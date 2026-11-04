@@ -4,14 +4,14 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
 import { Button } from "@/components/ui/Button";
 import { prisma } from "@/lib/prisma";
-import { searchProperties } from "@/lib/properties";
+import { getPublishedCities, searchProperties } from "@/lib/properties";
 
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Imóveis em São Luís",
+  title: "Imóveis",
   description:
-    "Encontre apartamentos, casas e coberturas de médio e alto padrão em São Luís — Península, Calhau, Ponta d'Areia, Renascença e mais.",
+    "Encontre apartamentos, casas e coberturas de médio e alto padrão em cidades de todo o Brasil, com orientação especializada.",
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -31,11 +31,12 @@ export default async function ImoveisPage({ searchParams }: { searchParams: Sear
       ? [sp.amenities]
       : [];
 
-  const [result, neighborhoods] = await Promise.all([
+  const [result, cities, neighborhoods] = await Promise.all([
     searchProperties({
       q: typeof sp.q === "string" ? sp.q : undefined,
       purpose: typeof sp.purpose === "string" ? sp.purpose : undefined,
       type: typeof sp.type === "string" ? sp.type : undefined,
+      city: typeof sp.city === "string" ? sp.city : undefined,
       neighborhood: typeof sp.neighborhood === "string" ? sp.neighborhood : undefined,
       minPrice: num(sp.minPrice),
       maxPrice: num(sp.maxPrice),
@@ -53,6 +54,7 @@ export default async function ImoveisPage({ searchParams }: { searchParams: Sear
       page,
       pageSize: 12,
     }),
+    getPublishedCities(),
     prisma.neighborhood.findMany({ where: { published: true }, orderBy: { order: "asc" } }),
   ]);
 
@@ -78,7 +80,7 @@ export default async function ImoveisPage({ searchParams }: { searchParams: Sear
 
         <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
           <Suspense fallback={<div className="rounded-2xl bg-ice p-6">Carregando filtros...</div>}>
-            <PropertyFilters neighborhoods={neighborhoods} />
+            <PropertyFilters cities={cities} neighborhoods={neighborhoods} />
           </Suspense>
 
           <div>

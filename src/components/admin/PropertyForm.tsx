@@ -123,8 +123,8 @@ export function PropertyForm({
       acceptsTrade: fd.get("acceptsTrade") === "on",
       neighborhoodId: String(fd.get("neighborhoodId") || "") || null,
       address: String(fd.get("address") || "") || null,
-      city: String(fd.get("city") || "São Luís"),
-      state: String(fd.get("state") || "MA"),
+      city: String(fd.get("city") || ""),
+      state: String(fd.get("state") || ""),
       zipCode: String(fd.get("zipCode") || "") || null,
       latitude: numOrNull(fd.get("latitude")),
       longitude: numOrNull(fd.get("longitude")),
@@ -233,11 +233,11 @@ export function PropertyForm({
           </div>
           <div>
             <label className="admin-label">Cidade</label>
-            <input name="city" defaultValue={initial?.city || "São Luís"} className="admin-input" />
+            <input name="city" required defaultValue={initial?.city || ""} className="admin-input" placeholder="Ex.: São Paulo" />
           </div>
           <div>
             <label className="admin-label">Estado</label>
-            <input name="state" defaultValue={initial?.state || "MA"} className="admin-input" />
+            <input name="state" required defaultValue={initial?.state || ""} className="admin-input" placeholder="Ex.: SP" />
           </div>
           <div>
             <label className="admin-label">CEP</label>

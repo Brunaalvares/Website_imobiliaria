@@ -5,7 +5,7 @@ import { TestimonialsCarousel } from "@/components/home/TestimonialsCarousel";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
-import { getMostLikedProperties } from "@/lib/properties";
+import { getMostLikedProperties, getPublishedCities } from "@/lib/properties";
 import { getSiteSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
@@ -16,6 +16,7 @@ export default async function HomePage() {
   const settings = await getSiteSettings();
 
   let liked: Awaited<ReturnType<typeof getMostLikedProperties>> = [];
+  let cities: string[] = [];
   let neighborhoods: { id: string; name: string; slug: string; imageUrl: string | null }[] = [];
   let testimonials: Awaited<ReturnType<typeof prisma.testimonial.findMany>> = [];
   let posts: {
@@ -29,8 +30,9 @@ export default async function HomePage() {
   }[] = [];
 
   try {
-    [liked, neighborhoods, testimonials, posts] = await Promise.all([
+    [liked, cities, neighborhoods, testimonials, posts] = await Promise.all([
       getMostLikedProperties(6),
+      getPublishedCities(),
       prisma.neighborhood.findMany({
         where: { published: true },
         orderBy: { order: "asc" },
@@ -66,6 +68,7 @@ export default async function HomePage() {
       <HeroSearch
         headline={settings.heroHeadline}
         subheadline={settings.heroSubheadline}
+        cities={cities}
         neighborhoods={neighborhoods.map((n) => ({ name: n.name, slug: n.slug }))}
       />
 
@@ -73,7 +76,7 @@ export default async function HomePage() {
         <div className="container-site">
           <SectionHeading
             title="Os imóveis que mais despertam interesse"
-            subtitle="Explore os imóveis mais curtidos pelos visitantes e descubra oportunidades selecionadas em São Luís."
+            subtitle="Explore os imóveis mais curtidos pelos visitantes e descubra oportunidades selecionadas em todo o Brasil."
           />
           {liked.length ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -98,7 +101,7 @@ export default async function HomePage() {
         <div className="container-site">
           <SectionHeading
             title="Encontre o endereço que combina com você"
-            subtitle="Explore regiões valorizadas de São Luís e descubra oportunidades alinhadas ao seu estilo de vida."
+            subtitle="Explore regiões valorizadas e descubra oportunidades alinhadas ao seu estilo de vida."
           />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {neighborhoods.map((n) => (
@@ -112,7 +115,7 @@ export default async function HomePage() {
                     n.imageUrl ||
                     "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1000&q=80"
                   }
-                  alt={`Imóveis em ${n.name}, São Luís`}
+                  alt={`Imóveis em ${n.name}`}
                   fill
                   className="object-cover transition duration-500 group-hover:scale-105"
                   sizes="(max-width:768px) 100vw, 33vw"
@@ -187,7 +190,7 @@ export default async function HomePage() {
         <div className="container-site">
           <SectionHeading
             title="Informação para decisões inteligentes"
-            subtitle="Artigos sobre o mercado imobiliário de São Luís, bairros, investimentos e dicas para compradores."
+            subtitle="Artigos sobre o mercado imobiliário, bairros, investimentos e dicas para compradores."
           />
           {posts.length ? (
             <div className="grid gap-6 md:grid-cols-3">

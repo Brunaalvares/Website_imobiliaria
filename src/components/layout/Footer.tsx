@@ -100,7 +100,7 @@ export function Footer({
 
       <div className="border-t border-gray-light">
         <div className="container-site flex items-center justify-between py-4 text-xs text-gray-muted">
-          <span>Imóveis selecionados em São Luís — MA</span>
+          <span>Imóveis selecionados em todo o Brasil</span>
           <Link href="/admin/login" className="hover:text-navy">
             Área Administrativa
           </Link>

@@ -14,6 +14,7 @@ export type PropertyCardData = {
   title: string;
   price: number;
   purpose: string;
+  city?: string | null;
   privateArea: number | null;
   bedrooms: number;
   suites: number;
@@ -94,7 +95,9 @@ export function PropertyCard({
             </Link>
           </h3>
           <p className="mt-1 text-sm text-gray-muted">
-            {property.neighborhood?.name || "São Luís"} · {likes} curtidas
+            {[property.neighborhood?.name, property.city].filter(Boolean).join(" · ") || "Brasil"}
+            {" · "}
+            {likes} curtidas
           </p>
         </div>
 

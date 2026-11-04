@@ -11,17 +11,26 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.siteSettings.upsert({
     where: { id: "default" },
-    update: {},
+    update: {
+      brandName: "Marcelo Alvares",
+      logoUrl: "/brand/logo-marcelo-alvares.webp",
+      heroHeadline: "Seu próximo imóvel começa com uma boa escolha.",
+      heroSubheadline:
+        "Encontre imóveis selecionados em todo o Brasil com a orientação de quem conhece o mercado imobiliário há mais de 30 anos.",
+      footerText:
+        "Experiência, confiança e conhecimento de mercado para orientar cada decisão imobiliária.",
+    },
     create: {
       id: "default",
       brandName: "Marcelo Alvares",
+      logoUrl: "/brand/logo-marcelo-alvares.webp",
       institutionalText:
         "Marcelo Alvares é economista e especialista no mercado imobiliário, com mais de 30 anos de experiência na realização de negócios que conectam pessoas às melhores oportunidades de compra, venda, locação e investimento. Conselheiro do CRECI-MA, une conhecimento de mercado, visão estratégica e atendimento personalizado para proporcionar negociações seguras e decisões patrimoniais inteligentes.",
       footerText:
         "Experiência, confiança e conhecimento de mercado para orientar cada decisão imobiliária.",
       heroHeadline: "Seu próximo imóvel começa com uma boa escolha.",
       heroSubheadline:
-        "Encontre imóveis selecionados em São Luís com a orientação de quem conhece o mercado imobiliário há mais de 30 anos.",
+        "Encontre imóveis selecionados em todo o Brasil com a orientação de quem conhece o mercado imobiliário há mais de 30 anos.",
       whatsapp: "",
       phone: "",
       email: "",
@@ -40,7 +49,7 @@ async function main() {
         slug: n.slug,
         order: index,
         published: true,
-        description: `Imóveis selecionados em ${n.name}, São Luís — MA.`,
+        description: `Imóveis selecionados em ${n.name}.`,
       },
     });
   }

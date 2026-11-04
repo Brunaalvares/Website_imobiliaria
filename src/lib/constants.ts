@@ -45,7 +45,7 @@ export const DEAL_TYPES = [
 
 export const BLOG_CATEGORIES = [
   { name: "Mercado imobiliário", slug: "mercado-imobiliario" },
-  { name: "São Luís e seus bairros", slug: "sao-luis-e-seus-bairros" },
+  { name: "Cidades e bairros", slug: "cidades-e-bairros" },
   { name: "Compra e venda", slug: "compra-e-venda" },
   { name: "Investimentos", slug: "investimentos" },
   { name: "Arquitetura e decoração", slug: "arquitetura-e-decoracao" },

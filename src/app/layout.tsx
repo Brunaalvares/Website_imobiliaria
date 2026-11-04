@@ -11,11 +11,11 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "Marcelo Alvares | Imóveis em São Luís — MA",
+    default: "Marcelo Alvares | Imóveis em todo o Brasil",
     template: "%s | Marcelo Alvares",
   },
   description:
-    "Imóveis residenciais de médio e alto padrão em São Luís. Orientação especializada de Marcelo Alvares, economista e conselheiro do CRECI-MA.",
+    "Imóveis residenciais de médio e alto padrão em todo o Brasil. Orientação especializada de Marcelo Alvares, economista e especialista no mercado imobiliário.",
   openGraph: {
     type: "website",
     locale: "pt_BR",

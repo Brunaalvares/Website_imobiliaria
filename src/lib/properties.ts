@@ -5,6 +5,7 @@ export type PropertyFilters = {
   q?: string;
   purpose?: string;
   type?: string;
+  city?: string;
   neighborhood?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -32,16 +33,20 @@ export function buildPropertyWhere(filters: PropertyFilters): Prisma.PropertyWhe
   if (filters.q) {
     const q = filters.q.trim();
     where.OR = [
-      { title: { contains: q } },
-      { description: { contains: q } },
-      { code: { contains: q } },
-      { neighborhood: { name: { contains: q } } },
-      { address: { contains: q } },
+      { title: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+      { code: { contains: q, mode: "insensitive" } },
+      { city: { contains: q, mode: "insensitive" } },
+      { neighborhood: { name: { contains: q, mode: "insensitive" } } },
+      { address: { contains: q, mode: "insensitive" } },
     ];
   }
 
   if (filters.purpose) where.purpose = filters.purpose;
   if (filters.type) where.type = filters.type;
+  if (filters.city) {
+    where.city = { equals: filters.city, mode: "insensitive" };
+  }
   if (filters.neighborhood) {
     where.neighborhood = { slug: filters.neighborhood };
   }
@@ -170,4 +175,17 @@ export async function getSimilarProperties(property: {
       neighborhood: true,
     },
   });
+}
+
+export async function getPublishedCities() {
+  const rows = await prisma.property.findMany({
+    where: {
+      status: "publicado",
+      NOT: { city: "" },
+    },
+    select: { city: true },
+    distinct: ["city"],
+    orderBy: { city: "asc" },
+  });
+  return rows.map((r) => r.city).filter(Boolean);
 }

@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/Button";
 import { Filter, X } from "lucide-react";
 
 export function PropertyFilters({
+  cities,
   neighborhoods,
 }: {
+  cities: string[];
   neighborhoods: { name: string; slug: string }[];
 }) {
   const router = useRouter();
@@ -73,6 +75,18 @@ export function PropertyFilters({
             ))}
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className="admin-label">Cidade</label>
+        <select name="city" className="form-input" defaultValue={searchParams.get("city") || ""}>
+          <option value="">Todas</option>
+          {cities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>

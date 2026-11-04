@@ -17,7 +17,7 @@ const FALLBACK = {
     "Experiência, confiança e conhecimento de mercado para orientar cada decisão imobiliária.",
   heroHeadline: "Seu próximo imóvel começa com uma boa escolha.",
   heroSubheadline:
-    "Encontre imóveis selecionados em São Luís com a orientação de quem conhece o mercado imobiliário há mais de 30 anos.",
+    "Encontre imóveis selecionados em todo o Brasil com a orientação de quem conhece o mercado imobiliário há mais de 30 anos.",
   heroImageUrl: null as string | null,
   analyticsId: "",
   smtpHost: "",

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Sobre Marcelo Alvares",
   description:
-    "Economista e especialista no mercado imobiliário, conselheiro do CRECI-MA, com mais de 30 anos de experiência em São Luís.",
+    "Economista e especialista no mercado imobiliário, conselheiro do CRECI-MA, com mais de 30 anos de experiência em todo o Brasil.",
 };
 
 export default async function SobrePage() {

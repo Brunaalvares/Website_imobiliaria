@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -7,6 +8,8 @@ import { useEffect, useState } from "react";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn, whatsappUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+
+const DEFAULT_LOGO = "/brand/logo-marcelo-alvares.webp";
 
 export function Header({
   brandName,
@@ -20,6 +23,7 @@ export function Header({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const logo = logoUrl || DEFAULT_LOGO;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -44,15 +48,15 @@ export function Header({
       )}
     >
       <div className="container-site flex h-[var(--header-h)] items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3">
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt={brandName} className="h-10 w-auto" />
-          ) : (
-            <span className="text-xl font-bold tracking-tight text-navy md:text-2xl">
-              {brandName}
-            </span>
-          )}
+        <Link href="/" className="flex items-center gap-3" aria-label={brandName}>
+          <Image
+            src={logo}
+            alt={`${brandName} Imóveis`}
+            width={220}
+            height={42}
+            className="h-9 w-auto md:h-11"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">

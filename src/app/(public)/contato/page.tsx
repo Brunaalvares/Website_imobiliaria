@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Contato",
   description:
-    "Fale com Marcelo Alvares para comprar, vender, alugar ou investir em imóveis em São Luís.",
+    "Fale com Marcelo Alvares para comprar, vender, alugar ou investir em imóveis em todo o Brasil.",
 };
 
 export default async function ContatoPage() {
