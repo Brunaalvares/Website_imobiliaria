@@ -11,6 +11,18 @@ Em **Project → Settings → Environment Variables** (Production e Preview):
 - `NEXT_PUBLIC_APP_URL` — mesma URL pública
 - `NEXT_PUBLIC_SUPABASE_URL` — `https://dklufvahagbfiqbilobb.supabase.co`
 
+### Atenção: senha com `#`
+
+Se a senha do banco tiver `#` (ex.: `Woman-Led#2179h3`), use **URL-encoded** `%23`:
+
+```text
+...:Woman-Led%232179h3@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+```
+
+Sem o encode, a Vercel corta a connection string e a home quebra com *Application error*.
+
+Diagnóstico rápido após o deploy: abra `/api/health`.
+
 ## Rede Supabase
 
 **Database → Network Restrictions**: permitir `0.0.0.0/0` (ou IPs da Vercel).

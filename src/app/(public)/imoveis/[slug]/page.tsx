@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
@@ -26,6 +24,8 @@ import {
   whatsappUrl,
 } from "@/lib/utils";
 import { LikeButton } from "@/components/property/LikeButton";
+
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 

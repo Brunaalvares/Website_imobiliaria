@@ -1,10 +1,10 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { getSiteSettings } from "@/lib/settings";
 import { whatsappUrl } from "@/lib/utils";
 
+
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Contato",
   description:

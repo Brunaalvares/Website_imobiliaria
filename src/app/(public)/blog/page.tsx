@@ -1,11 +1,11 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 
+
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Blog Imobiliário",
   description:

@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
 import Image from "next/image";
 import { TestimonialsCarousel } from "@/components/home/TestimonialsCarousel";
@@ -8,6 +6,8 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 
+
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Sobre Marcelo Alvares",
   description:

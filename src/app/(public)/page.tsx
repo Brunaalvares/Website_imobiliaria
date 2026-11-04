@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import Image from "next/image";
 import Link from "next/link";
 import { HeroSearch } from "@/components/home/HeroSearch";
@@ -12,34 +10,56 @@ import { getSiteSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 
+
+export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const settings = await getSiteSettings();
-  const [liked, neighborhoods, testimonials, posts] = await Promise.all([
-    getMostLikedProperties(6),
-    prisma.neighborhood.findMany({
-      where: { published: true },
-      orderBy: { order: "asc" },
-    }),
-    prisma.testimonial.findMany({
-      where: { published: true, authorized: true, showOnHome: true },
-      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
-    }),
-    prisma.blogPost.findMany({
-      where: { status: "publicado" },
-      orderBy: { publishedAt: "desc" },
-      take: 3,
-      include: { category: true },
-    }),
-  ]);
+
+  let liked: Awaited<ReturnType<typeof getMostLikedProperties>> = [];
+  let neighborhoods: { id: string; name: string; slug: string; imageUrl: string | null }[] = [];
+  let testimonials: Awaited<ReturnType<typeof prisma.testimonial.findMany>> = [];
+  let posts: {
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    coverUrl: string | null;
+    publishedAt: Date | null;
+    category: { name: string } | null;
+  }[] = [];
+
+  try {
+    [liked, neighborhoods, testimonials, posts] = await Promise.all([
+      getMostLikedProperties(6),
+      prisma.neighborhood.findMany({
+        where: { published: true },
+        orderBy: { order: "asc" },
+      }),
+      prisma.testimonial.findMany({
+        where: { published: true, authorized: true, showOnHome: true },
+        orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+      }),
+      prisma.blogPost.findMany({
+        where: { status: "publicado" },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+        include: { category: true },
+      }),
+    ]);
+  } catch (error) {
+    console.error("[HomePage] database error:", error);
+  }
 
   const homeTestimonials =
     testimonials.length > 0
       ? testimonials
-      : await prisma.testimonial.findMany({
-          where: { published: true, authorized: true },
-          orderBy: [{ order: "asc" }, { createdAt: "desc" }],
-          take: 6,
-        });
+      : await prisma.testimonial
+          .findMany({
+            where: { published: true, authorized: true },
+            orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+            take: 6,
+          })
+          .catch(() => []);
 
   return (
     <>

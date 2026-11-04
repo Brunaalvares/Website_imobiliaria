@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PropertyCard } from "@/components/property/PropertyCard";
@@ -8,6 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { prisma } from "@/lib/prisma";
 import { searchProperties } from "@/lib/properties";
 
+
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Imóveis em São Luís",
   description:
