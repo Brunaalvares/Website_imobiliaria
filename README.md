@@ -6,7 +6,7 @@ Plataforma full-stack para comercialização de imóveis residenciais de médio 
 
 - **Next.js 15** (App Router) + TypeScript
 - **Tailwind CSS 4**
-- **Prisma** + SQLite (local) — pronto para PostgreSQL/Supabase em produção
+- **Prisma** + **Supabase Postgres**
 - **NextAuth** (credenciais) para área administrativa
 - Armazenamento persistente de imagens em `uploads/` (servido via `/api/uploads`)
 
@@ -38,13 +38,23 @@ Acesse:
 
 | Variável | Descrição |
 |---|---|
-| `DATABASE_URL` | SQLite `file:./dev.db` ou PostgreSQL |
+| `DATABASE_URL` | Connection pooler do Supabase (porta **6543**, `pgbouncer=true`) |
+| `DIRECT_URL` | Connection de sessão do Supabase (porta **5432**) para migrations |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase |
 | `NEXTAUTH_URL` | URL pública do app |
 | `NEXTAUTH_SECRET` | Segredo forte (`openssl rand -base64 32`) |
 | `UPLOAD_DIR` | Pasta persistente de imagens (padrão `./uploads`) |
 | `NEXT_PUBLIC_APP_URL` | URL canônica para SEO/sitemap |
 
 SMTP e Analytics podem ser configurados também pelo painel em **Configurações**.
+
+### Rede do Supabase
+
+Se aparecer `address not in tenant allow_list`, abra no painel:
+
+**Project Settings → Database → Network Restrictions**
+
+e permita o IP do ambiente (ou desative a restrição durante o setup).
 
 ## Funcionalidades
 
@@ -70,10 +80,10 @@ SMTP e Analytics podem ser configurados também pelo painel em **Configurações
 O seed cria imóveis e artigos claramente marcados com `[DEMO]`.  
 Não há depoimentos fictícios, telefones, CRECI ou endereços inventados como se fossem reais — configure-os no painel.
 
-## Produção com PostgreSQL / Supabase
+## Supabase
 
-1. Altere `provider` em `prisma/schema.prisma` para `postgresql`
-2. Defina `DATABASE_URL` do Supabase/Postgres
+1. Copie `.env.example` → `.env` e preencha `DATABASE_URL` / `DIRECT_URL` do pooler (região do projeto)
+2. Libere o IP do servidor nas Network Restrictions do Supabase
 3. Execute `npx prisma db push && npm run db:seed`
 4. Para imagens no Supabase Storage, adapte `src/lib/storage.ts` (a API pública já usa URLs estáveis)
 
