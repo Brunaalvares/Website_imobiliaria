@@ -1,0 +1,248 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  passwordResetTokens PasswordResetToken[]
+  blogPosts           BlogPost[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SiteSettings {
+  id                String  @id @default("default")
+  brandName         String  @default("Marcelo Alvares")
+  logoUrl           String?
+  photoUrl          String?
+  institutionalText String  @default("Marcelo Alvares é economista e especialista no mercado imobiliário, com mais de 30 anos de experiência na realização de negócios que conectam pessoas às melhores oportunidades de compra, venda, locação e investimento. Conselheiro do CRECI-MA, une conhecimento de mercado, visão estratégica e atendimento personalizado para proporcionar negociações seguras e decisões patrimoniais inteligentes.")
+  whatsapp          String  @default("")
+  phone             String  @default("")
+  email             String  @default("")
+  instagram         String  @default("")
+  address           String  @default("")
+  creci             String  @default("")
+  footerText        String  @default("Experiência, confiança e conhecimento de mercado para orientar cada decisão imobiliária.")
+  heroHeadline      String  @default("Seu próximo imóvel começa com uma boa escolha.")
+  heroSubheadline   String  @default("Encontre imóveis selecionados em São Luís com a orientação de quem conhece o mercado imobiliário há mais de 30 anos.")
+  heroImageUrl      String?
+  analyticsId       String  @default("")
+  smtpHost          String  @default("")
+  smtpPort          Int     @default(587)
+  smtpUser          String  @default("")
+  smtpPass          String  @default("")
+  smtpFrom          String  @default("")
+  updatedAt         DateTime @updatedAt
+}
+
+model Neighborhood {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  imageUrl    String?
+  order       Int        @default(0)
+  published   Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  properties  Property[]
+}
+
+model Amenity {
+  id       String          @id @default(cuid())
+  name     String
+  slug     String          @unique
+  category String // property | condo
+  icon     String?
+  custom   Boolean         @default(false)
+  amenities PropertyAmenity[]
+}
+
+model Property {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  title            String
+  slug             String   @unique
+  description      String
+  type             String // apartamento | casa | cobertura | terreno | comercial
+  purpose          String // venda | locacao
+  status           String   @default("rascunho") // rascunho | publicado | vendido | alugado | arquivado
+  price            Float
+  condoFee         Float?
+  iptu             Float?
+  financing        Boolean  @default(false)
+  acceptsTrade     Boolean  @default(false)
+
+  neighborhoodId   String?
+  neighborhood     Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+  address          String?
+  city             String   @default("São Luís")
+  state            String   @default("MA")
+  zipCode          String?
+  latitude         Float?
+  longitude        Float?
+  showExactLocation Boolean @default(false)
+
+  privateArea      Float?
+  totalArea        Float?
+  bedrooms         Int      @default(0)
+  suites           Int      @default(0)
+  bathrooms        Int      @default(0)
+  parkingSpots     Int      @default(0)
+  floor            Int?
+  furnished        Boolean  @default(false)
+  balcony          Boolean  @default(false)
+  seaView          Boolean  @default(false)
+  maidRoom         Boolean  @default(false)
+  powderRoom       Boolean  @default(false)
+  office           Boolean  @default(false)
+  extraFeatures    String? // JSON array of strings
+
+  featured         Boolean  @default(false)
+  isNew            Boolean  @default(false)
+  isOpportunity    Boolean  @default(false)
+  isExclusive      Boolean  @default(false)
+  likeCount        Int      @default(0)
+
+  metaTitle        String?
+  metaDescription  String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  publishedAt      DateTime?
+
+  photos           PropertyPhoto[]
+  amenities        PropertyAmenity[]
+  likes            PropertyLike[]
+  visitRequests    VisitRequest[]
+  contacts         Contact[]
+}
+
+model PropertyPhoto {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  alt        String?
+  order      Int      @default(0)
+  isCover    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model PropertyAmenity {
+  propertyId String
+  amenityId  String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, amenityId])
+}
+
+model PropertyLike {
+  id           String   @id @default(cuid())
+  propertyId   String
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  visitorId    String
+  ipHash       String?
+  createdAt    DateTime @default(now())
+
+  @@unique([propertyId, visitorId])
+  @@index([visitorId])
+}
+
+model Testimonial {
+  id              String   @id @default(cuid())
+  clientName      String
+  photoUrl        String?
+  text            String
+  dealType        String // compra | venda | locacao | investimento
+  dealDate        DateTime?
+  authorized      Boolean  @default(false)
+  published       Boolean  @default(false)
+  showOnHome      Boolean  @default(false)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model BlogCategory {
+  id    String     @id @default(cuid())
+  name  String     @unique
+  slug  String     @unique
+  posts BlogPost[]
+}
+
+model BlogPost {
+  id              String       @id @default(cuid())
+  title           String
+  slug            String       @unique
+  excerpt         String
+  content         String
+  coverUrl        String?
+  categoryId      String?
+  category        BlogCategory? @relation(fields: [categoryId], references: [id])
+  authorId        String?
+  author          Admin?       @relation(fields: [authorId], references: [id])
+  authorName      String       @default("Marcelo Alvares")
+  readingMinutes  Int          @default(5)
+  status          String       @default("rascunho") // rascunho | publicado
+  metaTitle       String?
+  metaDescription String?
+  publishedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Contact {
+  id           String    @id @default(cuid())
+  name         String
+  email        String
+  phone        String
+  subject      String
+  message      String
+  propertyId   String?
+  property     Property? @relation(fields: [propertyId], references: [id])
+  source       String    @default("contato")
+  status       String    @default("novo") // novo | em_atendimento | visita_agendada | concluido | arquivado
+  notes        String?
+  lgpdConsent  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model VisitRequest {
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  phone        String
+  preferredDay String?
+  preferredTime String?
+  message      String?
+  propertyId   String
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  status       String   @default("novo")
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
