@@ -248,7 +248,7 @@ export default async function HomePage() {
           <div className="mt-8">
             <Button
               href={settings.whatsapp ? `https://wa.me/55${settings.whatsapp.replace(/\D/g, "")}` : "/contato"}
-              className="bg-white text-navy hover:bg-ice"
+              variant="secondary"
               size="lg"
             >
               Converse com Marcelo

@@ -118,7 +118,7 @@ export default async function SobrePage() {
       <section className="section-pad bg-[linear-gradient(135deg,#102A43,#071D34)] text-white">
         <div className="container-site max-w-2xl text-center">
           <h2 className="text-3xl font-bold md:text-4xl">Vamos encontrar seu próximo imóvel?</h2>
-          <Button href="/contato" className="mt-8 bg-white text-navy hover:bg-ice" size="lg">
+          <Button href="/contato" variant="secondary" className="mt-8" size="lg">
             Entre em contato
           </Button>
         </div>
