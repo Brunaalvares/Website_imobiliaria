@@ -62,6 +62,9 @@ export const DEFAULT_NEIGHBORHOODS = [
   { name: "São Marcos", slug: "sao-marcos" },
 ] as const;
 
+/** Cidades sempre disponíveis nos filtros (além das que já têm imóveis). */
+export const FEATURED_CITIES = ["Curitiba"] as const;
+
 export const PROPERTY_AMENITIES = [
   { name: "Varanda", slug: "varanda", category: "property" },
   { name: "Vista para o mar", slug: "vista-mar", category: "property" },

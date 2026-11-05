@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { FEATURED_CITIES } from "./constants";
 import { prisma } from "./prisma";
 
 export type PropertyFilters = {
@@ -187,5 +188,8 @@ export async function getPublishedCities() {
     distinct: ["city"],
     orderBy: { city: "asc" },
   });
-  return rows.map((r) => r.city).filter(Boolean);
+  const fromDb = rows.map((r) => r.city).filter(Boolean);
+  return Array.from(new Set([...FEATURED_CITIES, ...fromDb])).sort((a, b) =>
+    a.localeCompare(b, "pt-BR"),
+  );
 }
