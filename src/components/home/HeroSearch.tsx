@@ -19,10 +19,12 @@ const QUICK_FILTERS = [
 export function HeroSearch({
   headline,
   subheadline,
+  cities,
   neighborhoods,
 }: {
   headline: string;
   subheadline: string;
+  cities: string[];
   neighborhoods: { name: string; slug: string }[];
 }) {
   const router = useRouter();
@@ -44,7 +46,7 @@ export function HeroSearch({
       <div className="container-site relative section-pad pt-16 md:pt-24">
         <div className="mx-auto max-w-4xl text-center fade-up">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-gray-muted">
-            Marcelo Alvares · São Luís
+            Marcelo Alvares · Imóveis em todo o Brasil
           </p>
           <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-navy md:text-5xl lg:text-6xl">
             {headline}
@@ -59,9 +61,17 @@ export function HeroSearch({
           className="mx-auto mt-10 max-w-5xl rounded-2xl border border-gray-light bg-white p-4 shadow-[var(--shadow)] md:p-6 fade-up"
         >
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            <select name="city" className="form-input" defaultValue="">
+              <option value="">Cidade</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
             <input
               name="q"
-              className="form-input lg:col-span-2"
+              className="form-input"
               placeholder="Bairro, empreendimento ou localização"
             />
             <select name="type" className="form-input" defaultValue="">

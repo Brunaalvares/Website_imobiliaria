@@ -45,7 +45,7 @@ model SiteSettings {
   creci             String  @default("")
   footerText        String  @default("Experiência, confiança e conhecimento de mercado para orientar cada decisão imobiliária.")
   heroHeadline      String  @default("Seu próximo imóvel começa com uma boa escolha.")
-  heroSubheadline   String  @default("Encontre imóveis selecionados em São Luís com a orientação de quem conhece o mercado imobiliário há mais de 30 anos.")
+  heroSubheadline   String  @default("Encontre imóveis selecionados em todo o Brasil com a orientação de quem conhece o mercado imobiliário há mais de 30 anos.")
   heroImageUrl      String?
   analyticsId       String  @default("")
   smtpHost          String  @default("")
@@ -97,8 +97,8 @@ model Property {
   neighborhoodId   String?
   neighborhood     Neighborhood? @relation(fields: [neighborhoodId], references: [id])
   address          String?
-  city             String   @default("São Luís")
-  state            String   @default("MA")
+  city             String   @default("")
+  state            String   @default("")
   zipCode          String?
   latitude         Float?
   longitude        Float?

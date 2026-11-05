@@ -1,11 +1,11 @@
-export const dynamic = "force-dynamic";
-
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { Analytics } from "@/components/analytics/Analytics";
 import { getSiteSettings } from "@/lib/settings";
 
+
+export const dynamic = "force-dynamic";
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
 

@@ -45,7 +45,7 @@ export const DEAL_TYPES = [
 
 export const BLOG_CATEGORIES = [
   { name: "Mercado imobiliário", slug: "mercado-imobiliario" },
-  { name: "São Luís e seus bairros", slug: "sao-luis-e-seus-bairros" },
+  { name: "Cidades e bairros", slug: "cidades-e-bairros" },
   { name: "Compra e venda", slug: "compra-e-venda" },
   { name: "Investimentos", slug: "investimentos" },
   { name: "Arquitetura e decoração", slug: "arquitetura-e-decoracao" },
@@ -61,6 +61,9 @@ export const DEFAULT_NEIGHBORHOODS = [
   { name: "Renascença", slug: "renascenca" },
   { name: "São Marcos", slug: "sao-marcos" },
 ] as const;
+
+/** Cidades sempre disponíveis nos filtros (além das que já têm imóveis). */
+export const FEATURED_CITIES = ["Curitiba"] as const;
 
 export const PROPERTY_AMENITIES = [
   { name: "Varanda", slug: "varanda", category: "property" },

@@ -1,15 +1,15 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 
+
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Blog Imobiliário",
   description:
-    "Artigos sobre mercado imobiliário, bairros de São Luís, investimentos, compra e venda e dicas para compradores.",
+    "Artigos sobre mercado imobiliário, bairros, investimentos, compra e venda e dicas para compradores.",
 };
 
 export default async function BlogPage({
@@ -34,7 +34,7 @@ export default async function BlogPage({
         <div className="mb-10 max-w-3xl">
           <h1 className="text-4xl font-bold tracking-tight text-navy md:text-5xl">Blog</h1>
           <p className="mt-4 text-lg text-gray-muted">
-            Informação para decisões inteligentes no mercado imobiliário de São Luís.
+            Informação para decisões inteligentes no mercado imobiliário.
           </p>
         </div>
 

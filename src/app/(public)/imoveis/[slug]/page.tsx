@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
@@ -27,6 +25,8 @@ import {
 } from "@/lib/utils";
 import { LikeButton } from "@/components/property/LikeButton";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: property.metaTitle || property.title,
     description:
       property.metaDescription ||
-      `${propertyTypeLabel(property.type)} em ${property.neighborhood?.name || "São Luís"} — ${formatCurrency(property.price, property.purpose)}`,
+      `${propertyTypeLabel(property.type)} em ${property.neighborhood?.name || property.city || "Brasil"} — ${formatCurrency(property.price, property.purpose)}`,
     openGraph: {
       title: property.title,
       description: property.description.slice(0, 160),
