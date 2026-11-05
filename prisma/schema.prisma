@@ -96,6 +96,7 @@ model Property {
 
   neighborhoodId   String?
   neighborhood     Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+  neighborhoodName String   @default("")
   address          String?
   city             String   @default("")
   state            String   @default("")

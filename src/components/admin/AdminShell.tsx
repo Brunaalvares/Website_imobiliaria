@@ -8,7 +8,6 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
-  MapPin,
   MessageSquare,
   Settings,
   Star,
@@ -21,7 +20,6 @@ import { cn } from "@/lib/utils";
 const LINKS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/imoveis", label: "Imóveis", icon: Building2 },
-  { href: "/admin/bairros", label: "Bairros", icon: MapPin },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: Star },
   { href: "/admin/blog", label: "Blog", icon: FileText },
   { href: "/admin/contatos", label: "Contatos", icon: MessageSquare },

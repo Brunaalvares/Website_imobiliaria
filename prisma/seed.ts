@@ -212,9 +212,7 @@ async function main() {
           city: "São Luís",
           state: "MA",
           publishedAt: new Date(),
-          neighborhoodId: neighborhood?.id,
-          latitude: -2.5,
-          longitude: -44.3,
+          neighborhoodName: neighborhood?.name || "",
           showExactLocation: false,
           condoFee: data.purpose === "venda" ? 1200 : 800,
           photos: {
@@ -243,6 +241,47 @@ async function main() {
         });
       }
     }
+  }
+
+  const existingTestimonial = await prisma.testimonial.findFirst({
+    where: { clientName: "Ana Paula Ribeiro" },
+  });
+
+  if (!existingTestimonial) {
+    await prisma.testimonial.createMany({
+      data: [
+        {
+          clientName: "Ana Paula Ribeiro",
+          text: "O Marcelo conduziu toda a negociação com transparência e atenção aos detalhes. Encontramos exatamente o imóvel que buscávamos, no prazo e nas condições certas.",
+          dealType: "compra",
+          dealDate: new Date("2024-08-12"),
+          authorized: true,
+          published: true,
+          showOnHome: true,
+          order: 0,
+        },
+        {
+          clientName: "Carlos Eduardo Martins",
+          text: "Profissionalismo e visão de mercado. Me orientou em um investimento imobiliário com segurança e clareza em cada etapa do processo.",
+          dealType: "investimento",
+          dealDate: new Date("2024-11-03"),
+          authorized: true,
+          published: true,
+          showOnHome: true,
+          order: 1,
+        },
+        {
+          clientName: "Fernanda Souza",
+          text: "Vendemos nosso apartamento com agilidade e excelente suporte. Recomendo a quem busca atendimento personalizado e resultados concretos.",
+          dealType: "venda",
+          dealDate: new Date("2025-02-20"),
+          authorized: true,
+          published: true,
+          showOnHome: true,
+          order: 2,
+        },
+      ],
+    });
   }
 
   const category = await prisma.blogCategory.findFirst({
