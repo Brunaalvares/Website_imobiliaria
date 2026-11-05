@@ -2,21 +2,43 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-export default function AdminLoginPage() {
+import { Suspense } from "react";
+
+const CONFIG_ERROR =
+  "Autenticação não configurada no servidor. Defina NEXTAUTH_SECRET e NEXTAUTH_URL no Vercel e faça redeploy.";
+
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [configBroken, setConfigBroken] = useState(false);
 
   useEffect(() => {
+    if (searchParams.get("error") === "config") {
+      setConfigBroken(true);
+      setError(CONFIG_ERROR);
+    }
+
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d?.env?.hasNextAuthSecret) {
+          setConfigBroken(true);
+          setError(CONFIG_ERROR);
+        }
+      })
+      .catch(() => undefined);
+
     fetch("/api/admin/setup")
       .then((r) => r.json())
       .then((d) => {
         if (d.needsSetup) router.replace("/admin/setup");
       })
       .catch(() => undefined);
-  }, [router]);
+  }, [router, searchParams]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,13 +53,17 @@ export default function AdminLoginPage() {
         callbackUrl: "/admin",
       });
       if (!res || res.error) {
-        setError("E-mail ou senha inválidos.");
+        setError(
+          configBroken || res?.error === "Configuration"
+            ? CONFIG_ERROR
+            : "E-mail ou senha inválidos.",
+        );
         setLoading(false);
         return;
       }
       window.location.href = "/admin";
     } catch {
-      setError("Não foi possível entrar. Tente novamente.");
+      setError(configBroken ? CONFIG_ERROR : "Não foi possível entrar. Tente novamente.");
       setLoading(false);
     }
   }
@@ -50,16 +76,16 @@ export default function AdminLoginPage() {
         <div className="mt-6 space-y-4">
           <div>
             <label className="admin-label">E-mail</label>
-            <input name="email" type="email" required className="admin-input" />
+            <input name="email" type="email" required className="admin-input" disabled={configBroken} />
           </div>
           <div>
             <label className="admin-label">Senha</label>
-            <input name="password" type="password" required className="admin-input" />
+            <input name="password" type="password" required className="admin-input" disabled={configBroken} />
           </div>
           {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || configBroken}
             className="inline-flex w-full items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-navy-dark disabled:opacity-50"
           >
             {loading ? "Entrando..." : "Entrar"}
@@ -75,5 +101,13 @@ export default function AdminLoginPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-ice text-gray-muted">Carregando...</div>}>
+      <AdminLoginForm />
+    </Suspense>
   );
 }
