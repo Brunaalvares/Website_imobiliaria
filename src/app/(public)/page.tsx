@@ -17,7 +17,6 @@ export default async function HomePage() {
 
   let liked: Awaited<ReturnType<typeof getMostLikedProperties>> = [];
   let cities: string[] = [];
-  let neighborhoods: { id: string; name: string; slug: string; imageUrl: string | null }[] = [];
   let testimonials: Awaited<ReturnType<typeof prisma.testimonial.findMany>> = [];
   let posts: {
     id: string;
@@ -30,13 +29,9 @@ export default async function HomePage() {
   }[] = [];
 
   try {
-    [liked, cities, neighborhoods, testimonials, posts] = await Promise.all([
+    [liked, cities, testimonials, posts] = await Promise.all([
       getMostLikedProperties(6),
       getPublishedCities(),
-      prisma.neighborhood.findMany({
-        where: { published: true },
-        orderBy: { order: "asc" },
-      }),
       prisma.testimonial.findMany({
         where: { published: true, authorized: true, showOnHome: true },
         orderBy: [{ order: "asc" }, { createdAt: "desc" }],
@@ -69,7 +64,6 @@ export default async function HomePage() {
         headline={settings.heroHeadline}
         subheadline={settings.heroSubheadline}
         cities={cities}
-        neighborhoods={neighborhoods.map((n) => ({ name: n.name, slug: n.slug }))}
       />
 
       <section className="section-pad">

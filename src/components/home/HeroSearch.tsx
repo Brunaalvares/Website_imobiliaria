@@ -20,12 +20,10 @@ export function HeroSearch({
   headline,
   subheadline,
   cities,
-  neighborhoods,
 }: {
   headline: string;
   subheadline: string;
   cities: string[];
-  neighborhoods: { name: string; slug: string }[];
 }) {
   const router = useRouter();
   const [advanced, setAdvanced] = useState(false);
@@ -60,7 +58,15 @@ export function HeroSearch({
           onSubmit={onSubmit}
           className="mx-auto mt-10 max-w-5xl rounded-2xl border border-gray-light bg-white p-4 shadow-[var(--shadow)] md:p-6 fade-up"
         >
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+            <div className="lg:col-span-2">
+              <input
+                name="q"
+                className="form-input"
+                placeholder="Palavra-chave: bairro, código, título..."
+                aria-label="Buscar por palavra-chave"
+              />
+            </div>
             <select name="city" className="form-input" defaultValue="">
               <option value="">Cidade</option>
               {cities.map((city) => (
@@ -69,11 +75,6 @@ export function HeroSearch({
                 </option>
               ))}
             </select>
-            <input
-              name="q"
-              className="form-input"
-              placeholder="Bairro, empreendimento ou localização"
-            />
             <select name="type" className="form-input" defaultValue="">
               <option value="">Tipo de imóvel</option>
               {PROPERTY_TYPES.map((t) => (
@@ -94,14 +95,12 @@ export function HeroSearch({
 
           {advanced ? (
             <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-              <select name="neighborhood" className="form-input" defaultValue="">
-                <option value="">Bairro</option>
-                {neighborhoods.map((n) => (
-                  <option key={n.slug} value={n.slug}>
-                    {n.name}
-                  </option>
-                ))}
-              </select>
+              <input
+                name="neighborhood"
+                className="form-input"
+                placeholder="Bairro"
+                aria-label="Filtrar por bairro"
+              />
               <input name="minPrice" type="number" min={0} className="form-input" placeholder="Preço mínimo" />
               <input name="maxPrice" type="number" min={0} className="form-input" placeholder="Preço máximo" />
               <input name="bedrooms" type="number" min={0} className="form-input" placeholder="Quartos" />

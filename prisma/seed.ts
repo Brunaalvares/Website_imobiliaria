@@ -212,9 +212,7 @@ async function main() {
           city: "São Luís",
           state: "MA",
           publishedAt: new Date(),
-          neighborhoodId: neighborhood?.id,
-          latitude: -2.5,
-          longitude: -44.3,
+          neighborhoodName: neighborhood?.name || "",
           showExactLocation: false,
           condoFee: data.purpose === "venda" ? 1200 : 800,
           photos: {

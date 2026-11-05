@@ -8,7 +8,6 @@ import { Upload, X, Star } from "lucide-react";
 
 type Photo = { url: string; alt?: string | null; order?: number; isCover?: boolean };
 type Amenity = { id: string; name: string; category: string };
-type Neighborhood = { id: string; name: string };
 
 type Initial = {
   id?: string;
@@ -23,14 +22,11 @@ type Initial = {
   iptu?: number | null;
   financing?: boolean;
   acceptsTrade?: boolean;
-  neighborhoodId?: string | null;
+  neighborhoodName?: string | null;
   address?: string | null;
   city?: string;
   state?: string;
   zipCode?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  showExactLocation?: boolean;
   privateArea?: number | null;
   totalArea?: number | null;
   bedrooms?: number;
@@ -62,11 +58,9 @@ function numOrNull(v: FormDataEntryValue | null) {
 
 export function PropertyForm({
   initial,
-  neighborhoods,
   amenities,
 }: {
   initial?: Initial;
-  neighborhoods: Neighborhood[];
   amenities: Amenity[];
 }) {
   const router = useRouter();
@@ -121,14 +115,11 @@ export function PropertyForm({
       iptu: numOrNull(fd.get("iptu")),
       financing: fd.get("financing") === "on",
       acceptsTrade: fd.get("acceptsTrade") === "on",
-      neighborhoodId: String(fd.get("neighborhoodId") || "") || null,
+      neighborhoodName: String(fd.get("neighborhoodName") || "").trim(),
       address: String(fd.get("address") || "") || null,
       city: String(fd.get("city") || ""),
       state: String(fd.get("state") || ""),
       zipCode: String(fd.get("zipCode") || "") || null,
-      latitude: numOrNull(fd.get("latitude")),
-      longitude: numOrNull(fd.get("longitude")),
-      showExactLocation: fd.get("showExactLocation") === "on",
       privateArea: numOrNull(fd.get("privateArea")),
       totalArea: numOrNull(fd.get("totalArea")),
       bedrooms: Number(fd.get("bedrooms") || 0),
@@ -218,14 +209,12 @@ export function PropertyForm({
           </div>
           <div>
             <label className="admin-label">Bairro</label>
-            <select name="neighborhoodId" defaultValue={initial?.neighborhoodId || ""} className="admin-input">
-              <option value="">Selecione</option>
-              {neighborhoods.map((n) => (
-                <option key={n.id} value={n.id}>
-                  {n.name}
-                </option>
-              ))}
-            </select>
+            <input
+              name="neighborhoodName"
+              defaultValue={initial?.neighborhoodName || ""}
+              className="admin-input"
+              placeholder="Ex.: Batel, Centro, Água Verde"
+            />
           </div>
           <div>
             <label className="admin-label">Endereço</label>
@@ -233,28 +222,16 @@ export function PropertyForm({
           </div>
           <div>
             <label className="admin-label">Cidade</label>
-            <input name="city" required defaultValue={initial?.city || ""} className="admin-input" placeholder="Ex.: São Paulo" />
+            <input name="city" required defaultValue={initial?.city || ""} className="admin-input" placeholder="Ex.: Curitiba" />
           </div>
           <div>
             <label className="admin-label">Estado</label>
-            <input name="state" required defaultValue={initial?.state || ""} className="admin-input" placeholder="Ex.: SP" />
+            <input name="state" required defaultValue={initial?.state || ""} className="admin-input" placeholder="Ex.: PR" />
           </div>
           <div>
             <label className="admin-label">CEP</label>
             <input name="zipCode" defaultValue={initial?.zipCode || ""} className="admin-input" />
           </div>
-          <div>
-            <label className="admin-label">Latitude</label>
-            <input name="latitude" type="number" step="any" defaultValue={initial?.latitude ?? ""} className="admin-input" />
-          </div>
-          <div>
-            <label className="admin-label">Longitude</label>
-            <input name="longitude" type="number" step="any" defaultValue={initial?.longitude ?? ""} className="admin-input" />
-          </div>
-          <label className="inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" name="showExactLocation" defaultChecked={initial?.showExactLocation} />
-            Exibir endereço/mapa exato
-          </label>
         </div>
       </section>
 

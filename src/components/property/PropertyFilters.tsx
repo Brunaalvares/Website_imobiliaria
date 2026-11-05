@@ -8,10 +8,8 @@ import { Filter, X } from "lucide-react";
 
 export function PropertyFilters({
   cities,
-  neighborhoods,
 }: {
   cities: string[];
-  neighborhoods: { name: string; slug: string }[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -48,8 +46,13 @@ export function PropertyFilters({
       </div>
 
       <div>
-        <label className="admin-label">Busca</label>
-        <input name="q" className="form-input" defaultValue={searchParams.get("q") || ""} placeholder="Localização ou empreendimento" />
+        <label className="admin-label">Palavra-chave</label>
+        <input
+          name="q"
+          className="form-input"
+          defaultValue={searchParams.get("q") || ""}
+          placeholder="Título, bairro, código, cidade..."
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -91,14 +94,12 @@ export function PropertyFilters({
 
       <div>
         <label className="admin-label">Bairro</label>
-        <select name="neighborhood" className="form-input" defaultValue={searchParams.get("neighborhood") || ""}>
-          <option value="">Todos</option>
-          {neighborhoods.map((n) => (
-            <option key={n.slug} value={n.slug}>
-              {n.name}
-            </option>
-          ))}
-        </select>
+        <input
+          name="neighborhood"
+          className="form-input"
+          defaultValue={searchParams.get("neighborhood") || ""}
+          placeholder="Digite o nome do bairro"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">

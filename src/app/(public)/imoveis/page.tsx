@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
 import { Button } from "@/components/ui/Button";
-import { prisma } from "@/lib/prisma";
 import { getPublishedCities, searchProperties } from "@/lib/properties";
 
 
@@ -31,7 +30,7 @@ export default async function ImoveisPage({ searchParams }: { searchParams: Sear
       ? [sp.amenities]
       : [];
 
-  const [result, cities, neighborhoods] = await Promise.all([
+  const [result, cities] = await Promise.all([
     searchProperties({
       q: typeof sp.q === "string" ? sp.q : undefined,
       purpose: typeof sp.purpose === "string" ? sp.purpose : undefined,
@@ -55,7 +54,6 @@ export default async function ImoveisPage({ searchParams }: { searchParams: Sear
       pageSize: 12,
     }),
     getPublishedCities(),
-    prisma.neighborhood.findMany({ where: { published: true }, orderBy: { order: "asc" } }),
   ]);
 
   const params = new URLSearchParams();
@@ -80,7 +78,7 @@ export default async function ImoveisPage({ searchParams }: { searchParams: Sear
 
         <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
           <Suspense fallback={<div className="rounded-2xl bg-ice p-6">Carregando filtros...</div>}>
-            <PropertyFilters cities={cities} neighborhoods={neighborhoods} />
+            <PropertyFilters cities={cities} />
           </Suspense>
 
           <div>
