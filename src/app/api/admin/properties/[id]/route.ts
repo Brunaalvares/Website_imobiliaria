@@ -85,7 +85,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const body = await req.json();
   const parsed = propertySchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+    const flat = parsed.error.flatten();
+    const first =
+      flat.fieldErrors.description?.[0] ||
+      flat.fieldErrors.title?.[0] ||
+      flat.fieldErrors.price?.[0] ||
+      "Verifique os campos obrigatórios.";
+    return NextResponse.json({ error: first, details: flat }, { status: 400 });
   }
   const data = parsed.data;
   let slug = slugify(data.slug || data.title);

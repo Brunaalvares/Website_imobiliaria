@@ -68,12 +68,15 @@ export default function AdminTestimonialsPage() {
   }
 
   async function uploadPhoto(file: File) {
+    const { prepareImageForUpload } = await import("@/lib/image-client");
+    const prepared = await prepareImageForUpload(file);
     const fd = new FormData();
-    fd.append("file", file);
+    fd.append("file", prepared);
     fd.append("folder", "testimonials");
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
     const data = await res.json();
     if (res.ok) setForm((f) => ({ ...f, photoUrl: data.url }));
+    else setError(data.error || "Falha no upload da foto");
   }
 
   return (

@@ -74,7 +74,13 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const parsed = propertySchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    const flat = parsed.error.flatten();
+    const first =
+      flat.fieldErrors.description?.[0] ||
+      flat.fieldErrors.title?.[0] ||
+      flat.fieldErrors.price?.[0] ||
+      "Verifique os campos obrigatórios.";
+    return NextResponse.json({ error: first, details: flat }, { status: 400 });
   }
 
   const data = parsed.data;

@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PROPERTY_STATUSES, PROPERTY_TYPES, PURPOSES } from "@/lib/constants";
+import { prepareImageForUpload } from "@/lib/image-client";
 import { Button } from "@/components/ui/Button";
 import { Upload, X, Star } from "lucide-react";
 
@@ -75,15 +76,18 @@ export function PropertyForm({
   async function uploadFiles(files: FileList | null) {
     if (!files?.length) return;
     setUploading(true);
+    setError("");
     try {
       const uploaded: Photo[] = [];
-      for (const file of Array.from(files)) {
+      for (const original of Array.from(files)) {
+        const file = await prepareImageForUpload(original);
         const fd = new FormData();
         fd.append("file", file);
         fd.append("folder", "properties");
         const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Falha no upload");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `Falha no upload (${res.status})`);
+        if (!data.url) throw new Error("Upload sem URL de retorno.");
         uploaded.push({ url: data.url, alt: "", isCover: false });
       }
       setPhotos((prev) => {
@@ -103,10 +107,16 @@ export function PropertyForm({
     setSaving(true);
     setError("");
     const fd = new FormData(e.currentTarget);
+    const description = String(fd.get("description") || "").trim();
+    if (description.length < 10) {
+      setError("A descrição precisa ter pelo menos 10 caracteres.");
+      setSaving(false);
+      return;
+    }
     const payload = {
       title: String(fd.get("title")),
       slug: String(fd.get("slug") || ""),
-      description: String(fd.get("description")),
+      description,
       type: String(fd.get("type")),
       purpose: String(fd.get("purpose")),
       status: String(fd.get("status")),
@@ -150,10 +160,15 @@ export function PropertyForm({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     setSaving(false);
     if (!res.ok) {
-      setError(data.error || "Erro ao salvar");
+      const detail =
+        data?.details?.fieldErrors &&
+        Object.entries(data.details.fieldErrors as Record<string, string[]>)
+          .map(([field, msgs]) => `${field}: ${(msgs || []).join(", ")}`)
+          .join(" · ");
+      setError(detail || data.error || `Erro ao salvar (${res.status})`);
       return;
     }
     router.push("/admin/imoveis");
@@ -205,7 +220,15 @@ export function PropertyForm({
           </div>
           <div className="md:col-span-2">
             <label className="admin-label">Descrição</label>
-            <textarea name="description" required rows={6} defaultValue={initial?.description} className="admin-input" />
+            <textarea
+              name="description"
+              required
+              minLength={10}
+              rows={6}
+              defaultValue={initial?.description}
+              className="admin-input"
+              placeholder="Descreva o imóvel com pelo menos 10 caracteres."
+            />
           </div>
           <div>
             <label className="admin-label">Bairro</label>
@@ -335,7 +358,9 @@ export function PropertyForm({
         <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-gray-light bg-ice px-4 py-10 text-center">
           <Upload className="text-navy" />
           <span className="mt-2 text-sm text-gray-muted">
-            {uploading ? "Enviando..." : "Arraste ou selecione imagens (JPEG, PNG, WebP)"}
+            {uploading
+              ? "Otimizando e enviando imagens..."
+              : "Selecione imagens (JPEG, PNG ou WebP). Elas são comprimidas automaticamente."}
           </span>
           <input
             type="file"

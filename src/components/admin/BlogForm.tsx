@@ -31,12 +31,15 @@ export function BlogForm({
   const [saving, setSaving] = useState(false);
 
   async function upload(file: File) {
+    const { prepareImageForUpload } = await import("@/lib/image-client");
+    const prepared = await prepareImageForUpload(file);
     const fd = new FormData();
-    fd.append("file", file);
+    fd.append("file", prepared);
     fd.append("folder", "blog");
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
     const data = await res.json();
     if (res.ok) setCoverUrl(data.url);
+    else setError(data.error || "Falha no upload da capa");
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {

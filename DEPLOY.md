@@ -10,6 +10,11 @@ Em **Project → Settings → Environment Variables** (Production e Preview):
 - `NEXTAUTH_URL` — URL pública (ex.: `https://websiteimobiliaria.vercel.app`)
 - `NEXT_PUBLIC_APP_URL` — mesma URL pública
 - `NEXT_PUBLIC_SUPABASE_URL` — `https://dklufvahagbfiqbilobb.supabase.co`
+- `SUPABASE_SERVICE_ROLE_KEY` — **obrigatório para upload de imagens** (Supabase → Project Settings → API → `service_role`)
+
+Opcional:
+
+- `SUPABASE_STORAGE_BUCKET` — padrão: `uploads` (criado automaticamente no primeiro upload)
 
 ### Atenção: senha com `#`
 
@@ -21,7 +26,12 @@ Se a senha do banco tiver `#` (ex.: `Woman-Led#2179h3`), use **URL-encoded** `%2
 
 Sem o encode, a Vercel corta a connection string e a home quebra com *Application error*.
 
-Diagnóstico rápido após o deploy: abra `/api/health`.
+### Upload de imagens
+
+Na Vercel o disco local **não persiste**. As fotos dos imóveis vão para o **Supabase Storage**.
+Sem `SUPABASE_SERVICE_ROLE_KEY`, o admin não consegue subir imagens.
+
+Diagnóstico rápido após o deploy: abra `/api/health` e confira `hasStorage: true`.
 
 ## Rede Supabase
 
