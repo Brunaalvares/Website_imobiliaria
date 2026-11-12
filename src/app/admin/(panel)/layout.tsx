@@ -3,6 +3,8 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPanelLayout({ children }: { children: React.ReactNode }) {
   if (!process.env.NEXTAUTH_SECRET) {
     redirect("/admin/login?error=config");

@@ -18,7 +18,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
 
-  let slug = slugify(parsed.data.slug || parsed.data.name);
+  const slug = slugify(parsed.data.slug || parsed.data.name);
   const taken = await prisma.blogTag.findFirst({ where: { slug, id: { not: id } } });
   if (taken) return NextResponse.json({ error: "Já existe uma tag com este nome." }, { status: 409 });
 
