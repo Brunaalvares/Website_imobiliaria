@@ -8,7 +8,6 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
-  MapPin,
   MessageSquare,
   Settings,
   Star,
@@ -21,9 +20,10 @@ import { cn } from "@/lib/utils";
 const LINKS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/imoveis", label: "Imóveis", icon: Building2 },
-  { href: "/admin/bairros", label: "Bairros", icon: MapPin },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: Star },
-  { href: "/admin/blog", label: "Blog", icon: FileText },
+  { href: "/admin/blog", label: "Artigos", icon: FileText },
+  { href: "/admin/blog/editorias", label: "Editorias", icon: FileText },
+  { href: "/admin/blog/tags", label: "Tags", icon: FileText },
   { href: "/admin/contatos", label: "Contatos", icon: MessageSquare },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
@@ -41,7 +41,16 @@ export function AdminShell({
   const nav = (
     <nav className="space-y-1">
       {LINKS.map((link) => {
-        const active = pathname === link.href || (link.href !== "/admin" && pathname.startsWith(link.href));
+        const active =
+          link.href === "/admin"
+            ? pathname === "/admin"
+            : link.href === "/admin/blog"
+              ? pathname === "/admin/blog" ||
+                pathname === "/admin/blog/novo" ||
+                (/^\/admin\/blog\/[^/]+$/.test(pathname) &&
+                  !pathname.startsWith("/admin/blog/editorias") &&
+                  !pathname.startsWith("/admin/blog/tags"))
+              : pathname === link.href || pathname.startsWith(`${link.href}/`);
         const Icon = link.icon;
         return (
           <Link

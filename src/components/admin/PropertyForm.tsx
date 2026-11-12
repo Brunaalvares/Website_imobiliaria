@@ -3,12 +3,12 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PROPERTY_STATUSES, PROPERTY_TYPES, PURPOSES } from "@/lib/constants";
+import { prepareImageForUpload } from "@/lib/image-client";
 import { Button } from "@/components/ui/Button";
 import { Upload, X, Star } from "lucide-react";
 
 type Photo = { url: string; alt?: string | null; order?: number; isCover?: boolean };
 type Amenity = { id: string; name: string; category: string };
-type Neighborhood = { id: string; name: string };
 
 type Initial = {
   id?: string;
@@ -23,14 +23,11 @@ type Initial = {
   iptu?: number | null;
   financing?: boolean;
   acceptsTrade?: boolean;
-  neighborhoodId?: string | null;
+  neighborhoodName?: string | null;
   address?: string | null;
   city?: string;
   state?: string;
   zipCode?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  showExactLocation?: boolean;
   privateArea?: number | null;
   totalArea?: number | null;
   bedrooms?: number;
@@ -62,11 +59,9 @@ function numOrNull(v: FormDataEntryValue | null) {
 
 export function PropertyForm({
   initial,
-  neighborhoods,
   amenities,
 }: {
   initial?: Initial;
-  neighborhoods: Neighborhood[];
   amenities: Amenity[];
 }) {
   const router = useRouter();
@@ -81,15 +76,18 @@ export function PropertyForm({
   async function uploadFiles(files: FileList | null) {
     if (!files?.length) return;
     setUploading(true);
+    setError("");
     try {
       const uploaded: Photo[] = [];
-      for (const file of Array.from(files)) {
+      for (const original of Array.from(files)) {
+        const file = await prepareImageForUpload(original);
         const fd = new FormData();
         fd.append("file", file);
         fd.append("folder", "properties");
         const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Falha no upload");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `Falha no upload (${res.status})`);
+        if (!data.url) throw new Error("Upload sem URL de retorno.");
         uploaded.push({ url: data.url, alt: "", isCover: false });
       }
       setPhotos((prev) => {
@@ -109,10 +107,16 @@ export function PropertyForm({
     setSaving(true);
     setError("");
     const fd = new FormData(e.currentTarget);
+    const description = String(fd.get("description") || "").trim();
+    if (description.length < 10) {
+      setError("A descrição precisa ter pelo menos 10 caracteres.");
+      setSaving(false);
+      return;
+    }
     const payload = {
       title: String(fd.get("title")),
       slug: String(fd.get("slug") || ""),
-      description: String(fd.get("description")),
+      description,
       type: String(fd.get("type")),
       purpose: String(fd.get("purpose")),
       status: String(fd.get("status")),
@@ -121,14 +125,11 @@ export function PropertyForm({
       iptu: numOrNull(fd.get("iptu")),
       financing: fd.get("financing") === "on",
       acceptsTrade: fd.get("acceptsTrade") === "on",
-      neighborhoodId: String(fd.get("neighborhoodId") || "") || null,
+      neighborhoodName: String(fd.get("neighborhoodName") || "").trim(),
       address: String(fd.get("address") || "") || null,
       city: String(fd.get("city") || ""),
       state: String(fd.get("state") || ""),
       zipCode: String(fd.get("zipCode") || "") || null,
-      latitude: numOrNull(fd.get("latitude")),
-      longitude: numOrNull(fd.get("longitude")),
-      showExactLocation: fd.get("showExactLocation") === "on",
       privateArea: numOrNull(fd.get("privateArea")),
       totalArea: numOrNull(fd.get("totalArea")),
       bedrooms: Number(fd.get("bedrooms") || 0),
@@ -159,10 +160,15 @@ export function PropertyForm({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     setSaving(false);
     if (!res.ok) {
-      setError(data.error || "Erro ao salvar");
+      const detail =
+        data?.details?.fieldErrors &&
+        Object.entries(data.details.fieldErrors as Record<string, string[]>)
+          .map(([field, msgs]) => `${field}: ${(msgs || []).join(", ")}`)
+          .join(" · ");
+      setError(detail || data.error || `Erro ao salvar (${res.status})`);
       return;
     }
     router.push("/admin/imoveis");
@@ -214,18 +220,24 @@ export function PropertyForm({
           </div>
           <div className="md:col-span-2">
             <label className="admin-label">Descrição</label>
-            <textarea name="description" required rows={6} defaultValue={initial?.description} className="admin-input" />
+            <textarea
+              name="description"
+              required
+              minLength={10}
+              rows={6}
+              defaultValue={initial?.description}
+              className="admin-input"
+              placeholder="Descreva o imóvel com pelo menos 10 caracteres."
+            />
           </div>
           <div>
             <label className="admin-label">Bairro</label>
-            <select name="neighborhoodId" defaultValue={initial?.neighborhoodId || ""} className="admin-input">
-              <option value="">Selecione</option>
-              {neighborhoods.map((n) => (
-                <option key={n.id} value={n.id}>
-                  {n.name}
-                </option>
-              ))}
-            </select>
+            <input
+              name="neighborhoodName"
+              defaultValue={initial?.neighborhoodName || ""}
+              className="admin-input"
+              placeholder="Ex.: Batel, Centro, Água Verde"
+            />
           </div>
           <div>
             <label className="admin-label">Endereço</label>
@@ -233,28 +245,16 @@ export function PropertyForm({
           </div>
           <div>
             <label className="admin-label">Cidade</label>
-            <input name="city" required defaultValue={initial?.city || ""} className="admin-input" placeholder="Ex.: São Paulo" />
+            <input name="city" required defaultValue={initial?.city || ""} className="admin-input" placeholder="Ex.: Curitiba" />
           </div>
           <div>
             <label className="admin-label">Estado</label>
-            <input name="state" required defaultValue={initial?.state || ""} className="admin-input" placeholder="Ex.: SP" />
+            <input name="state" required defaultValue={initial?.state || ""} className="admin-input" placeholder="Ex.: PR" />
           </div>
           <div>
             <label className="admin-label">CEP</label>
             <input name="zipCode" defaultValue={initial?.zipCode || ""} className="admin-input" />
           </div>
-          <div>
-            <label className="admin-label">Latitude</label>
-            <input name="latitude" type="number" step="any" defaultValue={initial?.latitude ?? ""} className="admin-input" />
-          </div>
-          <div>
-            <label className="admin-label">Longitude</label>
-            <input name="longitude" type="number" step="any" defaultValue={initial?.longitude ?? ""} className="admin-input" />
-          </div>
-          <label className="inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" name="showExactLocation" defaultChecked={initial?.showExactLocation} />
-            Exibir endereço/mapa exato
-          </label>
         </div>
       </section>
 
@@ -358,7 +358,9 @@ export function PropertyForm({
         <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-gray-light bg-ice px-4 py-10 text-center">
           <Upload className="text-navy" />
           <span className="mt-2 text-sm text-gray-muted">
-            {uploading ? "Enviando..." : "Arraste ou selecione imagens (JPEG, PNG, WebP)"}
+            {uploading
+              ? "Otimizando e enviando imagens..."
+              : "Selecione imagens (JPEG, PNG ou WebP). Elas são comprimidas automaticamente."}
           </span>
           <input
             type="file"

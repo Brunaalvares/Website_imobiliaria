@@ -25,6 +25,7 @@ export type PropertyCardData = {
   isNew?: boolean;
   isOpportunity?: boolean;
   isExclusive?: boolean;
+  neighborhoodName?: string | null;
   neighborhood?: { name: string } | null;
   photos: { url: string; alt: string | null; isCover: boolean }[];
 };
@@ -95,7 +96,9 @@ export function PropertyCard({
             </Link>
           </h3>
           <p className="mt-1 text-sm text-gray-muted">
-            {[property.neighborhood?.name, property.city].filter(Boolean).join(" · ") || "Brasil"}
+            {[property.neighborhoodName || property.neighborhood?.name, property.city]
+              .filter(Boolean)
+              .join(" · ") || "Brasil"}
             {" · "}
             {likes} curtidas
           </p>

@@ -95,11 +95,20 @@ img {
   animation: floatSoft 5s ease-in-out infinite;
 }
 
+.prose-blog h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 2rem 0 0.85rem;
+  line-height: 1.2;
+}
+
 .prose-blog h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--navy);
   margin: 2rem 0 0.75rem;
+  line-height: 1.25;
 }
 
 .prose-blog h3 {
@@ -123,6 +132,166 @@ img {
   list-style: disc;
   padding-left: 1.25rem;
   margin-bottom: 1rem;
+}
+
+.prose-blog ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.prose-blog li {
+  margin-bottom: 0.35rem;
+}
+
+.prose-blog blockquote {
+  border-left: 3px solid var(--navy);
+  padding-left: 1rem;
+  margin: 1.25rem 0;
+  color: var(--gray-muted);
+  font-style: italic;
+}
+
+.prose-blog hr {
+  border: 0;
+  border-top: 1px solid var(--gray-light);
+  margin: 2rem 0;
+}
+
+.prose-blog img,
+.prose-blog .blog-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 1.25rem 0;
+}
+
+.prose-blog table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose-blog th,
+.prose-blog td {
+  border: 1px solid var(--gray-light);
+  padding: 0.7rem 0.85rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose-blog th {
+  background: var(--ice);
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.prose-blog ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose-blog ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.rich-editor-content {
+  color: var(--gray-dark);
+  line-height: 1.7;
+}
+
+.rich-editor-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 1.25rem 0 0.75rem;
+}
+
+.rich-editor-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 1.1rem 0 0.6rem;
+}
+
+.rich-editor-content h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 1rem 0 0.5rem;
+}
+
+.rich-editor-content p {
+  margin-bottom: 0.85rem;
+}
+
+.rich-editor-content ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.85rem;
+}
+
+.rich-editor-content ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 0.85rem;
+}
+
+.rich-editor-content blockquote {
+  border-left: 3px solid var(--navy);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--gray-muted);
+}
+
+.rich-editor-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.rich-editor-content th,
+.rich-editor-content td {
+  border: 1px solid var(--gray-light);
+  padding: 0.55rem 0.7rem;
+  min-width: 80px;
+  vertical-align: top;
+}
+
+.rich-editor-content th {
+  background: var(--ice);
+  font-weight: 700;
+}
+
+.rich-editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.rich-editor-content .is-empty::before {
+  color: var(--gray-muted);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.rich-editor-content ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.rich-editor-content ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
 }
 
 .leaflet-container {

@@ -2,11 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/admin-api";
 import { saveImage } from "@/lib/storage";
 
+export const runtime = "nodejs";
+
 export async function POST(req: NextRequest) {
   const { error } = await requireAdminApi();
   if (error) return error;
 
-  const form = await req.formData();
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    return NextResponse.json(
+      { error: "Arquivo muito grande ou inválido. Use imagens de até ~4 MB." },
+      { status: 413 },
+    );
+  }
+
   const file = form.get("file");
   const folder = String(form.get("folder") || "settings") as
     | "properties"

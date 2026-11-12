@@ -42,7 +42,9 @@ export default async function AdminPropertiesPage() {
                   <Link href={`/admin/imoveis/${p.id}`} className="font-medium text-navy hover:underline">
                     {p.title}
                   </Link>
-                  <p className="text-xs text-gray-muted">{p.neighborhood?.name || "—"}</p>
+                  <p className="text-xs text-gray-muted">
+                    {[p.neighborhoodName || p.neighborhood?.name, p.city].filter(Boolean).join(" · ") || "—"}
+                  </p>
                 </td>
                 <td className="px-4 py-3">{p.code}</td>
                 <td className="px-4 py-3">{formatCurrency(p.price, p.purpose)}</td>

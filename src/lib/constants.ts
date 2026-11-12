@@ -44,13 +44,68 @@ export const DEAL_TYPES = [
 ] as const;
 
 export const BLOG_CATEGORIES = [
-  { name: "Mercado imobiliário", slug: "mercado-imobiliario" },
-  { name: "Cidades e bairros", slug: "cidades-e-bairros" },
-  { name: "Compra e venda", slug: "compra-e-venda" },
-  { name: "Investimentos", slug: "investimentos" },
-  { name: "Arquitetura e decoração", slug: "arquitetura-e-decoracao" },
-  { name: "Dicas para compradores", slug: "dicas-para-compradores" },
-  { name: "Tendências imobiliárias", slug: "tendencias-imobiliarias" },
+  {
+    name: "Compra de Imóveis",
+    slug: "compra-de-imoveis",
+    description: "Guias e orientações para quem deseja comprar imóveis com segurança.",
+  },
+  {
+    name: "Aluguel de Imóveis",
+    slug: "aluguel-de-imoveis",
+    description: "Dicas para locação residencial e comercial com menos riscos.",
+  },
+  {
+    name: "Financiamento Imobiliário",
+    slug: "financiamento-imobiliario",
+    description: "Como financiar, comparar taxas e planejar a compra do imóvel.",
+  },
+  {
+    name: "Investimento Imobiliário",
+    slug: "investimento-imobiliario",
+    description: "Análises e estratégias para investir no mercado imobiliário.",
+  },
+  {
+    name: "Mercado Imobiliário",
+    slug: "mercado-imobiliario",
+    description: "Tendências, cenários e leitura econômica do setor imobiliário.",
+  },
+  {
+    name: "Imóveis Comerciais",
+    slug: "imoveis-comerciais",
+    description: "Conteúdos sobre salas, lojas e oportunidades comerciais.",
+  },
+  {
+    name: "Dicas e Guias",
+    slug: "dicas-e-guias",
+    description: "Conteúdos práticos para compradores, vendedores e investidores.",
+  },
+  {
+    name: "Legislação Imobiliária",
+    slug: "legislacao-imobiliaria",
+    description: "Aspectos jurídicos e documentais das negociações imobiliárias.",
+  },
+] as const;
+
+export const BLOG_STATUSES = [
+  { value: "rascunho", label: "Rascunho" },
+  { value: "agendado", label: "Agendado" },
+  { value: "publicado", label: "Publicado" },
+] as const;
+
+export const EDITOR_FONT_FAMILIES = [
+  { label: "Manrope", value: "Manrope, system-ui, sans-serif" },
+  { label: "Georgia", value: "Georgia, serif" },
+  { label: "Arial", value: "Arial, Helvetica, sans-serif" },
+  { label: "Times New Roman", value: "\"Times New Roman\", Times, serif" },
+  { label: "Monoespaçada", value: "ui-monospace, SFMono-Regular, Menlo, monospace" },
+] as const;
+
+export const EDITOR_FONT_SIZES = [
+  { label: "Pequeno", value: "14px" },
+  { label: "Normal", value: "16px" },
+  { label: "Médio", value: "18px" },
+  { label: "Grande", value: "22px" },
+  { label: "Título", value: "28px" },
 ] as const;
 
 export const DEFAULT_NEIGHBORHOODS = [

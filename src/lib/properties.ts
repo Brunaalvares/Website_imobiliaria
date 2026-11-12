@@ -26,21 +26,42 @@ export type PropertyFilters = {
   status?: string;
 };
 
+function keywordClauses(term: string): Prisma.PropertyWhereInput[] {
+  return [
+    { title: { contains: term, mode: "insensitive" } },
+    { description: { contains: term, mode: "insensitive" } },
+    { code: { contains: term, mode: "insensitive" } },
+    { city: { contains: term, mode: "insensitive" } },
+    { state: { contains: term, mode: "insensitive" } },
+    { neighborhoodName: { contains: term, mode: "insensitive" } },
+    { address: { contains: term, mode: "insensitive" } },
+    { type: { contains: term, mode: "insensitive" } },
+    { neighborhood: { name: { contains: term, mode: "insensitive" } } },
+  ];
+}
+
 export function buildPropertyWhere(filters: PropertyFilters): Prisma.PropertyWhereInput {
   const where: Prisma.PropertyWhereInput = {
     status: filters.status ?? "publicado",
   };
 
+  const and: Prisma.PropertyWhereInput[] = [];
+
   if (filters.q) {
-    const q = filters.q.trim();
-    where.OR = [
-      { title: { contains: q, mode: "insensitive" } },
-      { description: { contains: q, mode: "insensitive" } },
-      { code: { contains: q, mode: "insensitive" } },
-      { city: { contains: q, mode: "insensitive" } },
-      { neighborhood: { name: { contains: q, mode: "insensitive" } } },
-      { address: { contains: q, mode: "insensitive" } },
-    ];
+    const tokens = filters.q
+      .trim()
+      .split(/\s+/)
+      .map((t) => t.trim())
+      .filter((t) => t.length >= 2);
+
+    if (tokens.length) {
+      for (const token of tokens) {
+        and.push({ OR: keywordClauses(token) });
+      }
+    } else {
+      const q = filters.q.trim();
+      if (q) and.push({ OR: keywordClauses(q) });
+    }
   }
 
   if (filters.purpose) where.purpose = filters.purpose;
@@ -49,7 +70,13 @@ export function buildPropertyWhere(filters: PropertyFilters): Prisma.PropertyWhe
     where.city = { equals: filters.city, mode: "insensitive" };
   }
   if (filters.neighborhood) {
-    where.neighborhood = { slug: filters.neighborhood };
+    and.push({
+      OR: [
+        { neighborhoodName: { contains: filters.neighborhood, mode: "insensitive" } },
+        { neighborhood: { name: { contains: filters.neighborhood, mode: "insensitive" } } },
+        { neighborhood: { slug: filters.neighborhood } },
+      ],
+    });
   }
   if (filters.minPrice != null || filters.maxPrice != null) {
     where.price = {};
@@ -69,10 +96,14 @@ export function buildPropertyWhere(filters: PropertyFilters): Prisma.PropertyWhe
   if (filters.seaView) where.seaView = true;
   if (filters.isNew) where.isNew = true;
   if (filters.amenities?.length) {
-    where.AND = filters.amenities.map((slug) => ({
-      amenities: { some: { amenity: { slug } } },
-    }));
+    and.push(
+      ...filters.amenities.map((slug) => ({
+        amenities: { some: { amenity: { slug } } },
+      })),
+    );
   }
+
+  if (and.length) where.AND = and;
 
   return where;
 }
@@ -93,6 +124,13 @@ export function buildPropertyOrderBy(
     default:
       return [{ publishedAt: "desc" }, { createdAt: "desc" }];
   }
+}
+
+export function propertyNeighborhoodLabel(property: {
+  neighborhoodName?: string | null;
+  neighborhood?: { name: string } | null;
+}) {
+  return property.neighborhoodName?.trim() || property.neighborhood?.name || "";
 }
 
 export async function searchProperties(filters: PropertyFilters) {
@@ -151,15 +189,21 @@ export async function getPropertyBySlug(slug: string) {
 export async function getSimilarProperties(property: {
   id: string;
   neighborhoodId: string | null;
+  neighborhoodName?: string | null;
   type: string;
   price: number;
+  city?: string;
 }) {
   return prisma.property.findMany({
     where: {
       status: "publicado",
       id: { not: property.id },
       OR: [
+        property.neighborhoodName
+          ? { neighborhoodName: { equals: property.neighborhoodName, mode: "insensitive" } }
+          : undefined,
         { neighborhoodId: property.neighborhoodId ?? undefined },
+        property.city ? { city: { equals: property.city, mode: "insensitive" } } : undefined,
         { type: property.type },
         {
           price: {
@@ -167,7 +211,7 @@ export async function getSimilarProperties(property: {
             lte: property.price * 1.3,
           },
         },
-      ],
+      ].filter(Boolean) as Prisma.PropertyWhereInput[],
     },
     take: 3,
     orderBy: { likeCount: "desc" },

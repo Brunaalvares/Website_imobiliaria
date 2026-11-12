@@ -39,12 +39,15 @@ export default function AdminSettingsPage() {
   }, []);
 
   async function upload(field: "logoUrl" | "photoUrl" | "heroImageUrl", file: File) {
+    const { prepareImageForUpload } = await import("@/lib/image-client");
+    const prepared = await prepareImageForUpload(file);
     const fd = new FormData();
-    fd.append("file", file);
+    fd.append("file", prepared);
     fd.append("folder", "settings");
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
     const data = await res.json();
     if (res.ok) setSettings((s) => (s ? { ...s, [field]: data.url } : s));
+    else setError(data.error || "Falha no upload da imagem");
   }
 
   async function onSubmit(e: FormEvent) {

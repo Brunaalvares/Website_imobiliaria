@@ -1,20 +1,43 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
-
+import { publicBlogWhere } from "@/lib/blog-publish";
 
 export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const [properties, posts] = await Promise.all([
+  const [properties, posts, categories] = await Promise.all([
     prisma.property.findMany({
       where: { status: "publicado" },
       select: { slug: true, updatedAt: true },
     }),
     prisma.blogPost.findMany({
-      where: { status: "publicado" },
+      where: publicBlogWhere(),
       select: { slug: true, updatedAt: true },
     }),
+    prisma.blogCategory.findMany({
+      where: { published: true },
+      select: { id: true, slug: true, updatedAt: true },
+    }),
   ]);
+
+  const categoriesWithPosts = [];
+  for (const category of categories) {
+    const count = await prisma.blogPost.count({
+      where: {
+        AND: [
+          publicBlogWhere(),
+          {
+            OR: [
+              { categoryId: category.id },
+              { secondaryCategories: { some: { categoryId: category.id } } },
+            ],
+          },
+        ],
+      },
+    });
+    if (count > 0) categoriesWithPosts.push(category);
+  }
 
   return [
     { url: base, changeFrequency: "daily", priority: 1 },
@@ -29,6 +52,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: p.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.8,
+    })),
+    ...categoriesWithPosts.map((c) => ({
+      url: `${base}/blog/${c.slug}`,
+      lastModified: c.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.65,
     })),
     ...posts.map((p) => ({
       url: `${base}/blog/${p.slug}`,

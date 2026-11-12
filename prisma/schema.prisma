@@ -96,6 +96,7 @@ model Property {
 
   neighborhoodId   String?
   neighborhood     Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+  neighborhoodName String   @default("")
   address          String?
   city             String   @default("")
   state            String   @default("")
@@ -187,10 +188,28 @@ model Testimonial {
 }
 
 model BlogCategory {
-  id    String     @id @default(cuid())
-  name  String     @unique
-  slug  String     @unique
-  posts BlogPost[]
+  id              String   @id @default(cuid())
+  name            String   @unique
+  slug            String   @unique
+  description     String   @default("")
+  imageUrl        String?
+  order           Int      @default(0)
+  published       Boolean  @default(true)
+  metaTitle       String?
+  metaDescription String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  posts           BlogPost[]
+  secondaryPosts  BlogPostSecondaryCategory[]
+}
+
+model BlogTag {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  slug      String        @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  posts     BlogPostTag[]
 }
 
 model BlogPost {
@@ -206,12 +225,34 @@ model BlogPost {
   author          Admin?       @relation(fields: [authorId], references: [id])
   authorName      String       @default("Marcelo Alvares")
   readingMinutes  Int          @default(5)
-  status          String       @default("rascunho") // rascunho | publicado
+  status          String       @default("rascunho") // rascunho | agendado | publicado
+  focusKeyword    String?
   metaTitle       String?
   metaDescription String?
+  scheduledAt     DateTime?
   publishedAt     DateTime?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+  tags            BlogPostTag[]
+  secondaryCategories BlogPostSecondaryCategory[]
+}
+
+model BlogPostTag {
+  postId String
+  tagId  String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+model BlogPostSecondaryCategory {
+  postId     String
+  categoryId String
+  post       BlogPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category   BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
 }
 
 model Contact {

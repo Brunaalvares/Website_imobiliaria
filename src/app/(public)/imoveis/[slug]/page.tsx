@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: property.metaTitle || property.title,
     description:
       property.metaDescription ||
-      `${propertyTypeLabel(property.type)} em ${property.neighborhood?.name || property.city || "Brasil"} — ${formatCurrency(property.price, property.purpose)}`,
+      `${propertyTypeLabel(property.type)} em ${property.neighborhoodName || property.neighborhood?.name || property.city || "Brasil"} — ${formatCurrency(property.price, property.purpose)}`,
     openGraph: {
       title: property.title,
       description: property.description.slice(0, 160),
@@ -114,7 +114,9 @@ export default async function PropertyDetailPage({ params }: Props) {
               </h1>
               <p className="mt-2 text-gray-muted">
                 Código {property.code}
-                {property.neighborhood ? ` · ${property.neighborhood.name}` : ""}
+                {property.neighborhoodName || property.neighborhood?.name
+                  ? ` · ${property.neighborhoodName || property.neighborhood?.name}`
+                  : ""}
                 {`, ${property.city} — ${property.state}`}
               </p>
               <p className="mt-4 text-3xl font-bold text-navy">

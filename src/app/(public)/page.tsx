@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { getMostLikedProperties, getPublishedCities } from "@/lib/properties";
 import { getSiteSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
+import { publicBlogWhere } from "@/lib/blog-publish";
 import { formatDate } from "@/lib/utils";
 
 
@@ -17,7 +18,6 @@ export default async function HomePage() {
 
   let liked: Awaited<ReturnType<typeof getMostLikedProperties>> = [];
   let cities: string[] = [];
-  let neighborhoods: { id: string; name: string; slug: string; imageUrl: string | null }[] = [];
   let testimonials: Awaited<ReturnType<typeof prisma.testimonial.findMany>> = [];
   let posts: {
     id: string;
@@ -30,19 +30,15 @@ export default async function HomePage() {
   }[] = [];
 
   try {
-    [liked, cities, neighborhoods, testimonials, posts] = await Promise.all([
+    [liked, cities, testimonials, posts] = await Promise.all([
       getMostLikedProperties(6),
       getPublishedCities(),
-      prisma.neighborhood.findMany({
-        where: { published: true },
-        orderBy: { order: "asc" },
-      }),
       prisma.testimonial.findMany({
         where: { published: true, authorized: true, showOnHome: true },
         orderBy: [{ order: "asc" }, { createdAt: "desc" }],
       }),
       prisma.blogPost.findMany({
-        where: { status: "publicado" },
+        where: publicBlogWhere(),
         orderBy: { publishedAt: "desc" },
         take: 3,
         include: { category: true },
@@ -69,7 +65,6 @@ export default async function HomePage() {
         headline={settings.heroHeadline}
         subheadline={settings.heroSubheadline}
         cities={cities}
-        neighborhoods={neighborhoods.map((n) => ({ name: n.name, slug: n.slug }))}
       />
 
       <section className="section-pad">
@@ -100,34 +95,23 @@ export default async function HomePage() {
       <section className="section-pad bg-ice">
         <div className="container-site">
           <SectionHeading
-            title="Encontre o endereço que combina com você"
-            subtitle="Explore regiões valorizadas e descubra oportunidades alinhadas ao seu estilo de vida."
+            title="A confiança de quem já fez um bom negócio"
+            subtitle="Depoimentos reais de clientes que confiaram na orientação de Marcelo Alvares."
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {neighborhoods.map((n) => (
-              <Link
-                key={n.id}
-                href={`/imoveis?neighborhood=${n.slug}`}
-                className="group relative aspect-[16/10] overflow-hidden rounded-2xl"
-              >
-                <Image
-                  src={
-                    n.imageUrl ||
-                    "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1000&q=80"
-                  }
-                  alt={`Imóveis em ${n.name}`}
-                  fill
-                  className="object-cover transition duration-500 group-hover:scale-105"
-                  sizes="(max-width:768px) 100vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy-dark/80 via-navy-dark/20 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-5">
-                  <h3 className="text-xl font-bold text-white">{n.name}</h3>
-                  <p className="text-sm text-white/80">Ver imóveis</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {homeTestimonials.length > 0 ? (
+            <>
+              <TestimonialsCarousel testimonials={homeTestimonials} />
+              <div className="mt-8 text-center">
+                <Button href="/sobre" variant="secondary">
+                  Conheça nossa trajetória
+                </Button>
+              </div>
+            </>
+          ) : (
+            <p className="rounded-2xl border border-dashed border-gray-light bg-white p-10 text-center text-gray-muted">
+              Em breve, depoimentos de clientes serão publicados aqui.
+            </p>
+          )}
         </div>
       </section>
 
@@ -168,23 +152,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {homeTestimonials.length > 0 ? (
-        <section className="section-pad bg-ice">
-          <div className="container-site">
-            <SectionHeading
-              title="A confiança de quem já fez um bom negócio"
-              subtitle="Depoimentos reais de clientes que confiaram na orientação de Marcelo Alvares."
-            />
-            <TestimonialsCarousel testimonials={homeTestimonials} />
-            <div className="mt-8 text-center">
-              <Button href="/sobre" variant="secondary">
-                Conheça nossa trajetória
-              </Button>
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       <section className="section-pad">
         <div className="container-site">

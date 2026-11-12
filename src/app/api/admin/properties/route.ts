@@ -16,14 +16,11 @@ const propertySchema = z.object({
   iptu: z.number().nullable().optional(),
   financing: z.boolean().optional(),
   acceptsTrade: z.boolean().optional(),
-  neighborhoodId: z.string().nullable().optional(),
+  neighborhoodName: z.string().optional(),
   address: z.string().nullable().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
   zipCode: z.string().nullable().optional(),
-  latitude: z.number().nullable().optional(),
-  longitude: z.number().nullable().optional(),
-  showExactLocation: z.boolean().optional(),
   privateArea: z.number().nullable().optional(),
   totalArea: z.number().nullable().optional(),
   bedrooms: z.number().int().optional(),
@@ -77,7 +74,13 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const parsed = propertySchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    const flat = parsed.error.flatten();
+    const first =
+      flat.fieldErrors.description?.[0] ||
+      flat.fieldErrors.title?.[0] ||
+      flat.fieldErrors.price?.[0] ||
+      "Verifique os campos obrigatórios.";
+    return NextResponse.json({ error: first, details: flat }, { status: 400 });
   }
 
   const data = parsed.data;
@@ -100,14 +103,15 @@ export async function POST(req: NextRequest) {
       iptu: data.iptu ?? null,
       financing: data.financing ?? false,
       acceptsTrade: data.acceptsTrade ?? false,
-      neighborhoodId: data.neighborhoodId || null,
+      neighborhoodId: null,
+      neighborhoodName: data.neighborhoodName?.trim() || "",
       address: data.address || null,
       city: data.city || "",
       state: data.state || "",
       zipCode: data.zipCode || null,
-      latitude: data.latitude ?? null,
-      longitude: data.longitude ?? null,
-      showExactLocation: data.showExactLocation ?? false,
+      latitude: null,
+      longitude: null,
+      showExactLocation: false,
       privateArea: data.privateArea ?? null,
       totalArea: data.totalArea ?? null,
       bedrooms: data.bedrooms ?? 0,
