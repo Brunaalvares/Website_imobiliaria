@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { getMostLikedProperties, getPublishedCities } from "@/lib/properties";
 import { getSiteSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
+import { publicBlogWhere } from "@/lib/blog-publish";
 import { formatDate } from "@/lib/utils";
 
 
@@ -37,7 +38,7 @@ export default async function HomePage() {
         orderBy: [{ order: "asc" }, { createdAt: "desc" }],
       }),
       prisma.blogPost.findMany({
-        where: { status: "publicado" },
+        where: publicBlogWhere(),
         orderBy: { publishedAt: "desc" },
         take: 3,
         include: { category: true },

@@ -62,11 +62,26 @@ async function main() {
     });
   }
 
-  for (const c of BLOG_CATEGORIES) {
+  for (const [index, c] of BLOG_CATEGORIES.entries()) {
     await prisma.blogCategory.upsert({
       where: { slug: c.slug },
-      update: { name: c.name },
-      create: { name: c.name, slug: c.slug },
+      update: {
+        name: c.name,
+        description: c.description,
+        order: index,
+        published: true,
+        metaTitle: `${c.name} | Blog Marcelo Alvares`,
+        metaDescription: c.description,
+      },
+      create: {
+        name: c.name,
+        slug: c.slug,
+        description: c.description,
+        order: index,
+        published: true,
+        metaTitle: `${c.name} | Blog Marcelo Alvares`,
+        metaDescription: c.description,
+      },
     });
   }
 
@@ -285,7 +300,7 @@ async function main() {
   }
 
   const category = await prisma.blogCategory.findFirst({
-    where: { slug: "mercado-imobiliario" },
+    where: { slug: "dicas-e-guias" },
   });
 
   const existingPost = await prisma.blogPost.findFirst({
@@ -318,7 +333,7 @@ async function main() {
       },
     });
 
-    const cat2 = await prisma.blogCategory.findFirst({ where: { slug: "sao-luis-e-seus-bairros" } });
+    const cat2 = await prisma.blogCategory.findFirst({ where: { slug: "compra-de-imoveis" } });
     if (cat2) {
       await prisma.blogPost.create({
         data: {
@@ -341,7 +356,7 @@ async function main() {
       });
     }
 
-    const cat3 = await prisma.blogCategory.findFirst({ where: { slug: "investimentos" } });
+    const cat3 = await prisma.blogCategory.findFirst({ where: { slug: "investimento-imobiliario" } });
     if (cat3) {
       await prisma.blogPost.create({
         data: {

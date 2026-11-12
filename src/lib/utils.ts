@@ -57,6 +57,7 @@ export function dealTypeLabel(type: string) {
 export function statusLabel(status: string) {
   const map: Record<string, string> = {
     rascunho: "Rascunho",
+    agendado: "Agendado",
     publicado: "Publicado",
     vendido: "Vendido",
     alugado: "Alugado",
