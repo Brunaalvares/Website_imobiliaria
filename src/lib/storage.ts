@@ -73,12 +73,14 @@ async function toWebpBuffer(
   }
 
   if (folder === "properties") {
+    // contain: a foto inteira cabe no 4:3 (sem zoom/crop); fundo neutro nas laterais.
     return pipeline
       .resize({
         width: PROPERTY_TARGET.width,
         height: PROPERTY_TARGET.height,
-        fit: "cover",
+        fit: "contain",
         position: "centre",
+        background: { r: 247, g: 249, b: 252, alpha: 1 },
       })
       .webp({ quality: 84, effort: 4 })
       .toBuffer();
