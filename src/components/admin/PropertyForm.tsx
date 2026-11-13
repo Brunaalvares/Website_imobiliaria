@@ -379,7 +379,7 @@ export function PropertyForm({
           <span className="mt-2 text-sm text-gray-muted">
             {uploading
               ? `Padronizando e enviando imagens... ${uploadProgress}`
-              : "Selecione quantas imagens quiser (JPEG, PNG, WebP ou HEIC). Fotos grandes são reduzidas para caber no padrão 4:3, sem corte."}
+              : "Selecione quantas imagens quiser (JPEG, PNG, WebP ou HEIC). Elas são padronizadas em 4:3 e otimizadas automaticamente."}
           </span>
           <input
             type="file"
@@ -403,7 +403,7 @@ export function PropertyForm({
                 <img
                   src={photo.url}
                   alt={photo.alt || ""}
-                  className="absolute inset-0 h-full w-full object-contain"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               </div>
               <div className="flex items-center justify-between gap-2 p-2">
