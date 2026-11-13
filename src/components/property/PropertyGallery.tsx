@@ -14,7 +14,6 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
     if (!photos.length) {
       return [{ id: "placeholder", url: PLACEHOLDER, alt: title }];
     }
-    // Capa primeiro, depois ordem — mesmo padrão em todos os imóveis.
     return [...photos].sort((a, b) => {
       if (a.isCover && !b.isCover) return -1;
       if (!a.isCover && b.isCover) return 1;
@@ -35,26 +34,22 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
 
   return (
     <div className="w-full">
-      {/*
-        Padrão único para todos os imóveis:
-        - quadro 4:3 em largura total da coluna
-        - object-cover (sem esticar)
-        - Image fill NÃO dentro de <button>
-      */}
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ice">
         <Image
+          key={current.url}
           src={current.url}
           alt={current.alt || title}
           fill
-          className="object-cover"
+          className="z-0 object-cover"
           sizes="(max-width:1024px) 100vw, 65vw"
           quality={90}
           priority
         />
+        {/* bg-transparent: botão padrão do browser cobria a foto com fundo branco */}
         <button
           type="button"
           onClick={() => setLightbox(true)}
-          className="absolute inset-0 z-10 cursor-zoom-in"
+          className="absolute inset-0 z-10 border-0 bg-transparent p-0 cursor-zoom-in"
           aria-label="Ampliar foto"
         />
       </div>
@@ -66,7 +61,7 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
               key={photo.id}
               type="button"
               onClick={() => setActive(i)}
-              className={`relative aspect-[4/3] w-[6.75rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice ${
+              className={`relative aspect-[4/3] w-[6.75rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice p-0 ${
                 i === active ? "border-navy" : "border-transparent"
               }`}
             >
