@@ -84,69 +84,81 @@ export async function POST(req: NextRequest) {
   }
 
   const data = parsed.data;
-  const code = await generatePropertyCode();
   let slug = slugify(data.slug || data.title);
   const existing = await prisma.property.findUnique({ where: { slug } });
   if (existing) slug = `${slug}-${Date.now().toString(36)}`;
 
-  const property = await prisma.property.create({
-    data: {
-      code,
-      title: data.title,
-      slug,
-      description: data.description,
-      type: data.type,
-      purpose: data.purpose,
-      status: data.status,
-      price: data.price,
-      condoFee: data.condoFee ?? null,
-      iptu: data.iptu ?? null,
-      financing: data.financing ?? false,
-      acceptsTrade: data.acceptsTrade ?? false,
-      neighborhoodId: null,
-      neighborhoodName: data.neighborhoodName?.trim() || "",
-      address: data.address || null,
-      city: data.city || "",
-      state: data.state || "",
-      zipCode: data.zipCode || null,
-      latitude: null,
-      longitude: null,
-      showExactLocation: false,
-      privateArea: data.privateArea ?? null,
-      totalArea: data.totalArea ?? null,
-      bedrooms: data.bedrooms ?? 0,
-      suites: data.suites ?? 0,
-      bathrooms: data.bathrooms ?? 0,
-      parkingSpots: data.parkingSpots ?? 0,
-      floor: data.floor ?? null,
-      furnished: data.furnished ?? false,
-      balcony: data.balcony ?? false,
-      seaView: data.seaView ?? false,
-      maidRoom: data.maidRoom ?? false,
-      powderRoom: data.powderRoom ?? false,
-      office: data.office ?? false,
-      featured: data.featured ?? false,
-      isNew: data.isNew ?? false,
-      isOpportunity: data.isOpportunity ?? false,
-      isExclusive: data.isExclusive ?? false,
-      metaTitle: data.metaTitle || null,
-      metaDescription: data.metaDescription || null,
-      publishedAt: data.status === "publicado" ? new Date() : null,
-      photos: data.photos?.length
-        ? {
-            create: data.photos.map((p, i) => ({
-              url: p.url,
-              alt: p.alt || null,
-              order: p.order ?? i,
-              isCover: p.isCover ?? i === 0,
-            })),
-          }
-        : undefined,
-      amenities: data.amenityIds?.length
-        ? { create: data.amenityIds.map((amenityId) => ({ amenityId })) }
-        : undefined,
-    },
-  });
+  try {
+    const code = await generatePropertyCode();
+    const property = await prisma.property.create({
+      data: {
+        code,
+        title: data.title,
+        slug,
+        description: data.description,
+        type: data.type,
+        purpose: data.purpose,
+        status: data.status,
+        price: data.price,
+        condoFee: data.condoFee ?? null,
+        iptu: data.iptu ?? null,
+        financing: data.financing ?? false,
+        acceptsTrade: data.acceptsTrade ?? false,
+        neighborhoodId: null,
+        neighborhoodName: data.neighborhoodName?.trim() || "",
+        address: data.address || null,
+        city: data.city || "",
+        state: data.state || "",
+        zipCode: data.zipCode || null,
+        latitude: null,
+        longitude: null,
+        showExactLocation: false,
+        privateArea: data.privateArea ?? null,
+        totalArea: data.totalArea ?? null,
+        bedrooms: data.bedrooms ?? 0,
+        suites: data.suites ?? 0,
+        bathrooms: data.bathrooms ?? 0,
+        parkingSpots: data.parkingSpots ?? 0,
+        floor: data.floor ?? null,
+        furnished: data.furnished ?? false,
+        balcony: data.balcony ?? false,
+        seaView: data.seaView ?? false,
+        maidRoom: data.maidRoom ?? false,
+        powderRoom: data.powderRoom ?? false,
+        office: data.office ?? false,
+        featured: data.featured ?? false,
+        isNew: data.isNew ?? false,
+        isOpportunity: data.isOpportunity ?? false,
+        isExclusive: data.isExclusive ?? false,
+        metaTitle: data.metaTitle || null,
+        metaDescription: data.metaDescription || null,
+        publishedAt: data.status === "publicado" ? new Date() : null,
+        photos: data.photos?.length
+          ? {
+              create: data.photos.map((p, i) => ({
+                url: p.url,
+                alt: p.alt || null,
+                order: p.order ?? i,
+                isCover: p.isCover ?? i === 0,
+              })),
+            }
+          : undefined,
+        amenities: data.amenityIds?.length
+          ? { create: data.amenityIds.map((amenityId) => ({ amenityId })) }
+          : undefined,
+      },
+    });
 
-  return NextResponse.json(property);
+    return NextResponse.json(property);
+  } catch (err) {
+    console.error("[admin/properties POST]", err);
+    const message = err instanceof Error ? err.message : "Erro ao criar anúncio";
+    if (/Unique constraint|unique/i.test(message)) {
+      return NextResponse.json(
+        { error: "Já existe um anúncio com este código ou URL. Tente salvar novamente." },
+        { status: 409 },
+      );
+    }
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
