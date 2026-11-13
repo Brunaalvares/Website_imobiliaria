@@ -33,7 +33,7 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
           src={current.url}
           alt={current.alt || title}
           fill
-          className="object-cover"
+          className="object-contain"
           sizes="(max-width:1024px) 100vw, 70vw"
           quality={90}
           priority
@@ -47,7 +47,7 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
               key={photo.id}
               type="button"
               onClick={() => setActive(i)}
-              className={`relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-xl border-2 ${
+              className={`relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-xl border-2 bg-ice ${
                 i === active ? "border-navy" : "border-transparent"
               }`}
             >
@@ -55,7 +55,7 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
                 src={photo.url}
                 alt={photo.alt || title}
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="112px"
                 quality={75}
               />
