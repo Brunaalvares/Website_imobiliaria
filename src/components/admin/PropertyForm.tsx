@@ -70,16 +70,24 @@ export function PropertyForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
 
   const condoAmenities = useMemo(() => amenities.filter((a) => a.category === "condo"), [amenities]);
 
   async function uploadFiles(files: FileList | null) {
     if (!files?.length) return;
+    const list = Array.from(files);
     setUploading(true);
     setError("");
-    try {
-      const uploaded: Photo[] = [];
-      for (const original of Array.from(files)) {
+    setUploadProgress(`0/${list.length}`);
+
+    const uploaded: Photo[] = [];
+    const failures: string[] = [];
+
+    for (let i = 0; i < list.length; i++) {
+      const original = list[i];
+      setUploadProgress(`${i + 1}/${list.length}`);
+      try {
         const file = await prepareImageForUpload(original, PROPERTY_IMAGE_PRESET);
         const fd = new FormData();
         fd.append("file", file);
@@ -89,17 +97,28 @@ export function PropertyForm({
         if (!res.ok) throw new Error(data.error || `Falha no upload (${res.status})`);
         if (!data.url) throw new Error("Upload sem URL de retorno.");
         uploaded.push({ url: data.url, alt: "", isCover: false });
+        // Atualiza preview conforme cada foto sobe (sem limite de quantidade).
+        setPhotos((prev) => {
+          const next = [...prev, { url: data.url as string, alt: "", isCover: false }];
+          if (!next.some((p) => p.isCover) && next[0]) next[0] = { ...next[0], isCover: true };
+          return next;
+        });
+      } catch (e) {
+        failures.push(
+          `${original.name}: ${e instanceof Error ? e.message : "erro desconhecido"}`,
+        );
       }
-      setPhotos((prev) => {
-        const next = [...prev, ...uploaded];
-        if (!next.some((p) => p.isCover) && next[0]) next[0].isCover = true;
-        return next;
-      });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro no upload");
-    } finally {
-      setUploading(false);
     }
+
+    if (failures.length) {
+      setError(
+        uploaded.length
+          ? `${uploaded.length} foto(s) enviada(s). Falhas: ${failures.join(" · ")}`
+          : `Nenhuma foto enviada. ${failures.join(" · ")}`,
+      );
+    }
+    setUploadProgress("");
+    setUploading(false);
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -359,12 +378,12 @@ export function PropertyForm({
           <Upload className="text-navy" />
           <span className="mt-2 text-sm text-gray-muted">
             {uploading
-              ? "Padronizando e enviando imagens..."
-              : "Selecione imagens (JPEG, PNG ou WebP). Elas são recortadas em 4:3 e otimizadas em alta resolução."}
+              ? `Padronizando e enviando imagens... ${uploadProgress}`
+              : "Selecione quantas imagens quiser (JPEG, PNG, WebP ou HEIC). Sem limite de quantidade — são recortadas em 4:3 e otimizadas."}
           </span>
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*,.heic,.heif"
             multiple
             className="hidden"
             onChange={(e) => {
@@ -373,6 +392,9 @@ export function PropertyForm({
             }}
           />
         </label>
+        {photos.length ? (
+          <p className="text-sm text-gray-muted">{photos.length} foto(s) no anúncio</p>
+        ) : null}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {photos.map((photo, index) => (
             <div key={photo.url} className="overflow-hidden rounded-xl border border-gray-light bg-white">
