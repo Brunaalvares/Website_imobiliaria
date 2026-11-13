@@ -5,8 +5,17 @@ import sharp from "sharp";
 import { getSupabaseAdmin, hasSupabaseStorageConfig } from "./supabase-admin";
 
 const UPLOAD_ROOT = path.resolve(process.env.UPLOAD_DIR || "./uploads");
-const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
-const MAX_BYTES = 4.5 * 1024 * 1024; // below Vercel serverless body limit
+const ALLOWED_MIME = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+  "image/avif",
+  "application/octet-stream", // alguns clientes enviam type vazio/errado
+]);
+const MAX_BYTES = 8 * 1024 * 1024; // após compressão no cliente; margem no servidor
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "uploads";
 
 export function getUploadRoot() {
@@ -28,8 +37,8 @@ async function ensureBucket() {
   if (!buckets?.some((b) => b.name === BUCKET)) {
     const { error: createError } = await supabase.storage.createBucket(BUCKET, {
       public: true,
-      fileSizeLimit: "10MB",
-      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+      fileSizeLimit: "15MB",
+      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/avif"],
     });
     if (createError && !/already exists/i.test(createError.message)) {
       throw new Error(`Não foi possível criar o bucket "${BUCKET}": ${createError.message}`);
@@ -38,24 +47,32 @@ async function ensureBucket() {
 }
 
 /** Property photos: standardized 4:3 cover crop at high resolution. */
-const PROPERTY_TARGET = { width: 1920, height: 1440 };
+const PROPERTY_TARGET = { width: 1600, height: 1200 };
 
 async function toWebpBuffer(
   file: File,
   folder: "properties" | "blog" | "testimonials" | "settings" | "neighborhoods",
 ) {
-  if (!ALLOWED_MIME.has(file.type)) {
-    throw new Error("Formato de imagem não suportado. Use JPEG, PNG ou WebP.");
+  const mime = (file.type || "").toLowerCase();
+  if (mime && !ALLOWED_MIME.has(mime) && !mime.startsWith("image/")) {
+    throw new Error("Formato de imagem não suportado. Use JPEG, PNG, WebP ou HEIC.");
   }
   if (file.size > MAX_BYTES) {
-    throw new Error("Arquivo muito grande. Máximo de 4,5 MB (a imagem é otimizada automaticamente).");
+    throw new Error("Arquivo muito grande. Otimize a imagem e tente novamente.");
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const pipeline = sharp(buffer).rotate();
+
+  let pipeline: ReturnType<typeof sharp>;
+  try {
+    // Valida se o sharp consegue ler (MIME mentiroso / HEIC / etc.)
+    await sharp(buffer, { failOn: "none" }).metadata();
+    pipeline = sharp(buffer, { failOn: "none" }).rotate();
+  } catch {
+    throw new Error("Não foi possível processar esta imagem. Converta para JPEG ou PNG e tente de novo.");
+  }
 
   if (folder === "properties") {
-    // Always emit exact 4:3 so listing cards/gallery stay proportional.
     return pipeline
       .resize({
         width: PROPERTY_TARGET.width,
@@ -63,7 +80,7 @@ async function toWebpBuffer(
         fit: "cover",
         position: "centre",
       })
-      .webp({ quality: 86, effort: 4 })
+      .webp({ quality: 84, effort: 4 })
       .toBuffer();
   }
 
