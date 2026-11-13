@@ -68,6 +68,7 @@ export function PropertyCard({
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width:768px) 100vw, 33vw"
+          quality={85}
         />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           <Badge>{purposeLabel(property.purpose)}</Badge>

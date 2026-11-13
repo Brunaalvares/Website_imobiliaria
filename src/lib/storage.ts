@@ -37,7 +37,13 @@ async function ensureBucket() {
   }
 }
 
-async function toWebpBuffer(file: File) {
+/** Property photos: standardized 4:3 cover crop at high resolution. */
+const PROPERTY_TARGET = { width: 1920, height: 1440 };
+
+async function toWebpBuffer(
+  file: File,
+  folder: "properties" | "blog" | "testimonials" | "settings" | "neighborhoods",
+) {
   if (!ALLOWED_MIME.has(file.type)) {
     throw new Error("Formato de imagem não suportado. Use JPEG, PNG ou WebP.");
   }
@@ -46,10 +52,24 @@ async function toWebpBuffer(file: File) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  return sharp(buffer)
-    .rotate()
+  const pipeline = sharp(buffer).rotate();
+
+  if (folder === "properties") {
+    // Always emit exact 4:3 so listing cards/gallery stay proportional.
+    return pipeline
+      .resize({
+        width: PROPERTY_TARGET.width,
+        height: PROPERTY_TARGET.height,
+        fit: "cover",
+        position: "centre",
+      })
+      .webp({ quality: 86, effort: 4 })
+      .toBuffer();
+  }
+
+  return pipeline
     .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
-    .webp({ quality: 80 })
+    .webp({ quality: 82, effort: 4 })
     .toBuffer();
 }
 
@@ -101,7 +121,7 @@ export async function saveImage(
   file: File,
   folder: "properties" | "blog" | "testimonials" | "settings" | "neighborhoods",
 ) {
-  const webp = await toWebpBuffer(file);
+  const webp = await toWebpBuffer(file, folder);
 
   // Prefer Supabase on production/serverless; local disk only for development.
   if (hasSupabaseStorageConfig()) {

@@ -27,7 +27,7 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
       <button
         type="button"
         onClick={() => setLightbox(true)}
-        className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-ice"
+        className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ice"
       >
         <Image
           src={current.url}
@@ -35,6 +35,7 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
           fill
           className="object-cover"
           sizes="(max-width:1024px) 100vw, 70vw"
+          quality={90}
           priority
         />
       </button>
@@ -46,11 +47,18 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
               key={photo.id}
               type="button"
               onClick={() => setActive(i)}
-              className={`relative h-20 w-28 shrink-0 overflow-hidden rounded-xl border-2 ${
+              className={`relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-xl border-2 ${
                 i === active ? "border-navy" : "border-transparent"
               }`}
             >
-              <Image src={photo.url} alt={photo.alt || title} fill className="object-cover" sizes="112px" />
+              <Image
+                src={photo.url}
+                alt={photo.alt || title}
+                fill
+                className="object-cover"
+                sizes="112px"
+                quality={75}
+              />
             </button>
           ))}
         </div>
