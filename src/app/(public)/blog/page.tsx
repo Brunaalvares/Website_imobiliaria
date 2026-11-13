@@ -22,22 +22,38 @@ export default async function BlogPage({
   const page = Math.max(1, Number(pageRaw) || 1);
   const pageSize = 9;
 
-  const categories = await prisma.blogCategory.findMany({
-    where: { published: true },
-    orderBy: [{ order: "asc" }, { name: "asc" }],
-  });
+  type BlogListPost = Awaited<
+    ReturnType<
+      typeof prisma.blogPost.findMany<{
+        include: { category: true };
+      }>
+    >
+  >[number];
 
-  const where = publicBlogWhere();
-  const [total, posts] = await Promise.all([
-    prisma.blogPost.count({ where }),
-    prisma.blogPost.findMany({
-      where,
-      orderBy: { publishedAt: "desc" },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      include: { category: true },
-    }),
-  ]);
+  let categories: Awaited<ReturnType<typeof prisma.blogCategory.findMany>> = [];
+  let total = 0;
+  let posts: BlogListPost[] = [];
+
+  try {
+    const where = publicBlogWhere();
+    [categories, total, posts] = await Promise.all([
+      prisma.blogCategory.findMany({
+        where: { published: true },
+        orderBy: [{ order: "asc" }, { name: "asc" }],
+      }),
+      prisma.blogPost.count({ where }),
+      prisma.blogPost.findMany({
+        where,
+        orderBy: { publishedAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { category: true },
+      }),
+    ]);
+  } catch (error) {
+    console.error("[BlogPage] database error:", error);
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (

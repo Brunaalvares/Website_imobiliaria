@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { BlogAdminNav } from "@/components/admin/BlogAdminNav";
 import { prepareImageForUpload } from "@/lib/image-client";
 import { slugify } from "@/lib/utils";
 
@@ -106,6 +107,7 @@ export default function AdminEditoriasPage() {
 
   return (
     <div className="space-y-6">
+      <BlogAdminNav />
       <div>
         <h1 className="text-3xl font-bold text-navy">Editorias</h1>
         <p className="text-gray-muted">Organize o blog por assuntos e configure SEO de cada categoria.</p>
