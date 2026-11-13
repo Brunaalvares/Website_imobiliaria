@@ -1,18 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
-type Photo = { id: string; url: string; alt: string | null };
+type Photo = { id: string; url: string; alt: string | null; isCover?: boolean; order?: number };
+
+const PLACEHOLDER =
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80";
 
 export function PropertyGallery({ photos, title }: { photos: Photo[]; title: string }) {
+  const list = useMemo(() => {
+    if (!photos.length) {
+      return [{ id: "placeholder", url: PLACEHOLDER, alt: title }];
+    }
+    // Capa primeiro, depois ordem — mesmo padrão em todos os imóveis.
+    return [...photos].sort((a, b) => {
+      if (a.isCover && !b.isCover) return -1;
+      if (!a.isCover && b.isCover) return 1;
+      return (a.order ?? 0) - (b.order ?? 0);
+    });
+  }, [photos, title]);
+
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
-  const list = photos.length
-    ? photos
-    : [{ id: "placeholder", url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80", alt: title }];
-
   const current = list[active] || list[0];
 
   function prev() {
@@ -23,33 +34,29 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
   }
 
   return (
-    <div>
+    <div className="w-full">
       {/*
-        Não usar <button> como pai de next/image fill — em vários browsers
-        position:absolute dentro de button quebra o object-fit e a foto
-        aparece “explodida”/recortada (só um canto).
+        Padrão único para todos os imóveis:
+        - quadro 4:3 em largura total da coluna
+        - object-cover (sem esticar)
+        - Image fill NÃO dentro de <button>
       */}
-      <div className="flex w-full justify-center">
-        <div
-          className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ice"
-          style={{ maxHeight: "min(70vh, 560px)", width: "min(100%, calc(min(70vh, 560px) * 4 / 3))" }}
-        >
-          <Image
-            src={current.url}
-            alt={current.alt || title}
-            fill
-            className="object-cover"
-            sizes="(max-width:1024px) 100vw, 70vw"
-            quality={90}
-            priority
-          />
-          <button
-            type="button"
-            onClick={() => setLightbox(true)}
-            className="absolute inset-0 z-10 cursor-zoom-in"
-            aria-label="Ampliar foto"
-          />
-        </div>
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ice">
+        <Image
+          src={current.url}
+          alt={current.alt || title}
+          fill
+          className="object-cover"
+          sizes="(max-width:1024px) 100vw, 65vw"
+          quality={90}
+          priority
+        />
+        <button
+          type="button"
+          onClick={() => setLightbox(true)}
+          className="absolute inset-0 z-10 cursor-zoom-in"
+          aria-label="Ampliar foto"
+        />
       </div>
 
       {list.length > 1 ? (
@@ -59,7 +66,7 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
               key={photo.id}
               type="button"
               onClick={() => setActive(i)}
-              className={`relative h-20 w-[6.75rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice ${
+              className={`relative aspect-[4/3] w-[6.75rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice ${
                 i === active ? "border-navy" : "border-transparent"
               }`}
             >
