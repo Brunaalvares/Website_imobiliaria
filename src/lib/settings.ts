@@ -44,6 +44,31 @@ export async function getSiteSettings() {
 
 export async function generatePropertyCode() {
   const year = new Date().getFullYear();
-  const count = await prisma.property.count();
-  return `MA-${year}-${String(count + 1).padStart(4, "0")}`;
+  const prefix = `MA-${year}-`;
+
+  // Usa o maior sufixo já existente no ano — count() quebra quando há buracos
+  // (exclusões ou códigos fora de ordem) e gera conflito de unique em `code`.
+  const latest = await prisma.property.findMany({
+    where: { code: { startsWith: prefix } },
+    select: { code: true },
+    orderBy: { code: "desc" },
+    take: 50,
+  });
+
+  let next = 1;
+  for (const row of latest) {
+    const match = row.code.match(/MA-\d{4}-(\d+)$/);
+    if (!match) continue;
+    const n = Number(match[1]);
+    if (Number.isFinite(n) && n >= next) next = n + 1;
+  }
+
+  // Garante unicidade mesmo sob concorrência.
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const code = `${prefix}${String(next + attempt).padStart(4, "0")}`;
+    const exists = await prisma.property.findUnique({ where: { code }, select: { id: true } });
+    if (!exists) return code;
+  }
+
+  return `${prefix}${Date.now().toString().slice(-6)}`;
 }
