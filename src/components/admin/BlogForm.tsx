@@ -128,6 +128,11 @@ export function BlogForm({
     setError("");
     setMessage("");
     const finalStatus = nextStatus || status;
+    if (!title.trim() || title.trim().length < 3) {
+      setError("Informe um título com pelo menos 3 caracteres.");
+      setSaving(false);
+      return;
+    }
     if (!categoryId) {
       setError("Selecione a editoria principal do artigo.");
       setSaving(false);
@@ -140,6 +145,11 @@ export function BlogForm({
     }
     if (!content || content.replace(/<[^>]+>/g, "").trim().length < 10) {
       setError("Escreva o conteúdo do artigo no editor.");
+      setSaving(false);
+      return;
+    }
+    if (finalStatus === "agendado" && !scheduledAt) {
+      setError("Defina a data/hora de agendamento.");
       setSaving(false);
       return;
     }
@@ -177,7 +187,12 @@ export function BlogForm({
     const data = await res.json().catch(() => ({}));
     setSaving(false);
     if (!res.ok) {
-      setError(data.error || "Erro ao salvar artigo");
+      const details = data?.details?.fieldErrors
+        ? Object.entries(data.details.fieldErrors as Record<string, string[]>)
+            .map(([field, msgs]) => `${field}: ${(msgs || []).join(", ")}`)
+            .join(" · ")
+        : "";
+      setError([data.error || "Erro ao salvar artigo", details].filter(Boolean).join(" — "));
       return;
     }
 
@@ -202,7 +217,10 @@ export function BlogForm({
   useEffect(() => {
     if (!initial?.id) return;
     const id = window.setInterval(() => {
-      if (document.visibilityState === "visible") void save("rascunho");
+      // Só faz autosave de rascunhos — nunca rebaixa um artigo publicado/agendado.
+      if (document.visibilityState === "visible" && status === "rascunho") {
+        void save("rascunho");
+      }
     }, 45000);
     return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
