@@ -24,21 +24,33 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => setLightbox(true)}
-        className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ice"
-      >
-        <Image
-          src={current.url}
-          alt={current.alt || title}
-          fill
-          className="object-contain"
-          sizes="(max-width:1024px) 100vw, 70vw"
-          quality={90}
-          priority
-        />
-      </button>
+      {/*
+        Não usar <button> como pai de next/image fill — em vários browsers
+        position:absolute dentro de button quebra o object-fit e a foto
+        aparece “explodida”/recortada (só um canto).
+      */}
+      <div className="flex w-full justify-center">
+        <div
+          className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ice"
+          style={{ maxHeight: "min(70vh, 560px)", width: "min(100%, calc(min(70vh, 560px) * 4 / 3))" }}
+        >
+          <Image
+            src={current.url}
+            alt={current.alt || title}
+            fill
+            className="object-cover"
+            sizes="(max-width:1024px) 100vw, 70vw"
+            quality={90}
+            priority
+          />
+          <button
+            type="button"
+            onClick={() => setLightbox(true)}
+            className="absolute inset-0 z-10 cursor-zoom-in"
+            aria-label="Ampliar foto"
+          />
+        </div>
+      </div>
 
       {list.length > 1 ? (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
@@ -47,18 +59,20 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
               key={photo.id}
               type="button"
               onClick={() => setActive(i)}
-              className={`relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-xl border-2 bg-ice ${
+              className={`relative h-20 w-[6.75rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice ${
                 i === active ? "border-navy" : "border-transparent"
               }`}
             >
-              <Image
-                src={photo.url}
-                alt={photo.alt || title}
-                fill
-                className="object-contain"
-                sizes="112px"
-                quality={75}
-              />
+              <span className="pointer-events-none absolute inset-0">
+                <Image
+                  src={photo.url}
+                  alt={photo.alt || title}
+                  fill
+                  className="object-cover"
+                  sizes="108px"
+                  quality={70}
+                />
+              </span>
             </button>
           ))}
         </div>
@@ -78,7 +92,14 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
             <ChevronLeft size={36} />
           </button>
           <div className="relative h-[80vh] w-full max-w-5xl">
-            <Image src={current.url} alt={current.alt || title} fill className="object-contain" sizes="100vw" />
+            <Image
+              src={current.url}
+              alt={current.alt || title}
+              fill
+              className="object-contain"
+              sizes="100vw"
+              quality={90}
+            />
           </div>
           <button type="button" className="absolute right-4 text-white" onClick={next} aria-label="Próximo">
             <ChevronRight size={36} />

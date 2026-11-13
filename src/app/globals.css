@@ -53,6 +53,13 @@ img {
   height: auto;
 }
 
+/* next/image fill: não aplicar height:auto / max-width global */
+img[data-nimg="fill"] {
+  max-width: none;
+  width: 100%;
+  height: 100%;
+}
+
 ::selection {
   background: color-mix(in srgb, var(--navy) 18%, white);
 }

@@ -10,8 +10,8 @@ export type PrepareImageOptions = {
   aspectRatio?: number;
   /**
    * How to fit into the aspect ratio:
-   * - contain (default): shrink whole image into the frame (no zoom/crop)
-   * - cover: fill the frame and crop overflow
+   * - cover (default for listings): fill the frame, crop overflow
+   * - contain: shrink whole image into the frame with letterbox
    */
   fit?: "contain" | "cover";
   /** Keep final JPEG under this many bytes (default ~3.5MB for Vercel). */
@@ -110,7 +110,7 @@ export async function prepareImageForUpload(
   const maxBytes = options.maxBytes ?? 3.5 * 1024 * 1024;
   let quality = options.quality ?? 0.82;
   const aspectRatio = options.aspectRatio;
-  const fit = options.fit ?? (aspectRatio ? "contain" : "cover");
+  const fit = options.fit ?? (aspectRatio ? "cover" : "cover");
 
   if (!looksLikeImage(file)) {
     throw new Error(`Arquivo inválido (${file.name}). Use JPEG, PNG, WebP ou HEIC.`);
@@ -179,11 +179,11 @@ export async function prepareImageForUpload(
   return new File([blob], `${base}.jpg`, { type: "image/jpeg", lastModified: Date.now() });
 }
 
-/** Preset for property listing photos: 4:3 contain (sem zoom), sob limite da Vercel. */
+/** Preset for property listing photos: 4:3 cover, sob limite da Vercel. */
 export const PROPERTY_IMAGE_PRESET: PrepareImageOptions = {
   maxEdge: 1600,
   quality: 0.82,
   aspectRatio: 4 / 3,
-  fit: "contain",
+  fit: "cover",
   maxBytes: 3.5 * 1024 * 1024,
 };
