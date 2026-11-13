@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { BlogForm } from "@/components/admin/BlogForm";
+import { BlogAdminNav } from "@/components/admin/BlogAdminNav";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -22,6 +23,7 @@ export default async function EditBlogPostPage({ params }: Props) {
 
   return (
     <div className="space-y-6">
+      <BlogAdminNav />
       <div>
         <h1 className="text-3xl font-bold text-navy">Editar artigo</h1>
         <p className="text-gray-muted">/{post.slug}</p>

@@ -13,6 +13,7 @@ import {
   Star,
   Menu,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -21,9 +22,16 @@ const LINKS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/imoveis", label: "Imóveis", icon: Building2 },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: Star },
-  { href: "/admin/blog", label: "Artigos", icon: FileText },
-  { href: "/admin/blog/editorias", label: "Editorias", icon: FileText },
-  { href: "/admin/blog/tags", label: "Tags", icon: FileText },
+  {
+    href: "/admin/blog",
+    label: "Blog",
+    icon: FileText,
+    children: [
+      { href: "/admin/blog", label: "Artigos" },
+      { href: "/admin/blog/editorias", label: "Editorias" },
+      { href: "/admin/blog/tags", label: "Tags" },
+    ],
+  },
   { href: "/admin/contatos", label: "Contatos", icon: MessageSquare },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
@@ -37,21 +45,65 @@ export function AdminShell({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const blogOpen = pathname.startsWith("/admin/blog");
 
   const nav = (
     <nav className="space-y-1">
       {LINKS.map((link) => {
-        const active =
-          link.href === "/admin"
-            ? pathname === "/admin"
-            : link.href === "/admin/blog"
-              ? pathname === "/admin/blog" ||
-                pathname === "/admin/blog/novo" ||
-                (/^\/admin\/blog\/[^/]+$/.test(pathname) &&
-                  !pathname.startsWith("/admin/blog/editorias") &&
-                  !pathname.startsWith("/admin/blog/tags"))
-              : pathname === link.href || pathname.startsWith(`${link.href}/`);
         const Icon = link.icon;
+        const isBlog = link.href === "/admin/blog";
+        const active = isBlog
+          ? blogOpen
+          : link.href === "/admin"
+            ? pathname === "/admin"
+            : pathname === link.href || pathname.startsWith(`${link.href}/`);
+
+        if (isBlog && link.children) {
+          return (
+            <div key={link.href} className="space-y-1">
+              <Link
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+                  active ? "bg-navy text-white" : "text-gray-dark hover:bg-ice",
+                )}
+              >
+                <Icon size={18} />
+                <span className="flex-1">{link.label}</span>
+                <ChevronDown size={16} className={cn("opacity-70 transition", blogOpen && "rotate-180")} />
+              </Link>
+              {blogOpen ? (
+                <div className="ml-4 space-y-1 border-l border-gray-light pl-3">
+                  {link.children.map((child) => {
+                    const childActive =
+                      child.href === "/admin/blog"
+                        ? pathname === "/admin/blog" ||
+                          pathname === "/admin/blog/novo" ||
+                          (/^\/admin\/blog\/[^/]+$/.test(pathname) &&
+                            !pathname.startsWith("/admin/blog/editorias") &&
+                            !pathname.startsWith("/admin/blog/tags"))
+                        : pathname === child.href || pathname.startsWith(`${child.href}/`);
+                    return (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          "block rounded-lg px-3 py-2 text-sm font-medium transition",
+                          childActive ? "bg-ice text-navy" : "text-gray-muted hover:bg-ice hover:text-navy",
+                        )}
+                      >
+                        {child.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+          );
+        }
+
         return (
           <Link
             key={link.href}

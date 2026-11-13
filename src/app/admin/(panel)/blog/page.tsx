@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/Button";
+import { BlogAdminNav } from "@/components/admin/BlogAdminNav";
 import { formatDate, statusLabel } from "@/lib/utils";
 import { BlogDeleteButton } from "@/components/admin/BlogDeleteButton";
 
@@ -33,20 +34,13 @@ export default async function AdminBlogPage({
 
   return (
     <div className="space-y-6">
+      <BlogAdminNav />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold text-navy">Artigos</h1>
           <p className="text-gray-muted">Crie, edite, agende e publique conteúdos do blog.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button href="/admin/blog/editorias" variant="secondary">
-            Editorias
-          </Button>
-          <Button href="/admin/blog/tags" variant="secondary">
-            Tags
-          </Button>
-          <Button href="/admin/blog/novo">Novo artigo</Button>
-        </div>
+        <Button href="/admin/blog/novo">Novo artigo</Button>
       </div>
 
       <form className="grid gap-3 rounded-2xl border border-gray-light bg-white p-4 md:grid-cols-4">

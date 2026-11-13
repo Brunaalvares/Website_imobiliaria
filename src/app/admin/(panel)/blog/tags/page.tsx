@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { BlogAdminNav } from "@/components/admin/BlogAdminNav";
 import { slugify } from "@/lib/utils";
 
 type Tag = {
@@ -52,6 +53,7 @@ export default function AdminTagsPage() {
 
   return (
     <div className="space-y-6">
+      <BlogAdminNav />
       <div>
         <h1 className="text-3xl font-bold text-navy">Tags</h1>
         <p className="text-gray-muted">Assuntos específicos associados aos artigos.</p>
