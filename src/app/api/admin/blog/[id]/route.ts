@@ -46,64 +46,72 @@ async function resolveTagIds(tagIds: string[] = [], tagNames: string[] = []) {
 export async function PUT(req: NextRequest, { params }: Params) {
   const { error } = await requireAdminApi();
   if (error) return error;
-  const { id } = await params;
-  const existing = await prisma.blogPost.findUnique({ where: { id } });
-  if (!existing) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
+  try {
+    const { id } = await params;
+    const existing = await prisma.blogPost.findUnique({ where: { id } });
+    if (!existing) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
 
-  const parsed = schema.safeParse(await req.json());
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    const parsed = schema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    }
+
+    let slug = slugify(parsed.data.slug || parsed.data.title);
+    const taken = await prisma.blogPost.findFirst({ where: { slug, id: { not: id } } });
+    if (taken) slug = `${slug}-${Date.now().toString(36)}`;
+    const categoryClash = await prisma.blogCategory.findUnique({ where: { slug } });
+    if (categoryClash) slug = `${slug}-artigo`;
+
+    if (existing.coverUrl && existing.coverUrl !== parsed.data.coverUrl) {
+      await deleteImageByUrl(existing.coverUrl);
+    }
+
+    const tagIds = await resolveTagIds(parsed.data.tagIds, parsed.data.tagNames);
+    const content = sanitizeBlogHtml(parsed.data.content);
+    const scheduledAt =
+      parsed.data.status === "agendado" && parsed.data.scheduledAt
+        ? new Date(parsed.data.scheduledAt)
+        : null;
+
+    await prisma.blogPostTag.deleteMany({ where: { postId: id } });
+    await prisma.blogPostSecondaryCategory.deleteMany({ where: { postId: id } });
+
+    const post = await prisma.blogPost.update({
+      where: { id },
+      data: {
+        title: parsed.data.title,
+        slug,
+        excerpt: parsed.data.excerpt,
+        content,
+        coverUrl: parsed.data.coverUrl || null,
+        categoryId: parsed.data.categoryId,
+        authorName: parsed.data.authorName || existing.authorName,
+        readingMinutes: parsed.data.readingMinutes || readingTime(content),
+        status: parsed.data.status,
+        focusKeyword: parsed.data.focusKeyword || null,
+        metaTitle: parsed.data.metaTitle || null,
+        metaDescription: parsed.data.metaDescription || null,
+        scheduledAt,
+        publishedAt:
+          parsed.data.status === "publicado"
+            ? existing.publishedAt || new Date()
+            : parsed.data.status === "agendado"
+              ? scheduledAt
+              : existing.publishedAt,
+        tags: tagIds.length ? { create: tagIds.map((tagId) => ({ tagId })) } : undefined,
+        secondaryCategories: parsed.data.secondaryCategoryIds?.length
+          ? { create: parsed.data.secondaryCategoryIds.map((categoryId) => ({ categoryId })) }
+          : undefined,
+      },
+    });
+    return NextResponse.json(post);
+  } catch (err) {
+    console.error("[admin/blog PUT]", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Erro ao atualizar artigo" },
+      { status: 500 },
+    );
   }
-
-  let slug = slugify(parsed.data.slug || parsed.data.title);
-  const taken = await prisma.blogPost.findFirst({ where: { slug, id: { not: id } } });
-  if (taken) slug = `${slug}-${Date.now().toString(36)}`;
-  const categoryClash = await prisma.blogCategory.findUnique({ where: { slug } });
-  if (categoryClash) slug = `${slug}-artigo`;
-
-  if (existing.coverUrl && existing.coverUrl !== parsed.data.coverUrl) {
-    await deleteImageByUrl(existing.coverUrl);
-  }
-
-  const tagIds = await resolveTagIds(parsed.data.tagIds, parsed.data.tagNames);
-  const content = sanitizeBlogHtml(parsed.data.content);
-  const scheduledAt =
-    parsed.data.status === "agendado" && parsed.data.scheduledAt
-      ? new Date(parsed.data.scheduledAt)
-      : null;
-
-  await prisma.blogPostTag.deleteMany({ where: { postId: id } });
-  await prisma.blogPostSecondaryCategory.deleteMany({ where: { postId: id } });
-
-  const post = await prisma.blogPost.update({
-    where: { id },
-    data: {
-      title: parsed.data.title,
-      slug,
-      excerpt: parsed.data.excerpt,
-      content,
-      coverUrl: parsed.data.coverUrl || null,
-      categoryId: parsed.data.categoryId,
-      authorName: parsed.data.authorName || existing.authorName,
-      readingMinutes: parsed.data.readingMinutes || readingTime(content),
-      status: parsed.data.status,
-      focusKeyword: parsed.data.focusKeyword || null,
-      metaTitle: parsed.data.metaTitle || null,
-      metaDescription: parsed.data.metaDescription || null,
-      scheduledAt,
-      publishedAt:
-        parsed.data.status === "publicado"
-          ? existing.publishedAt || new Date()
-          : parsed.data.status === "agendado"
-            ? scheduledAt
-            : existing.publishedAt,
-      tags: tagIds.length ? { create: tagIds.map((tagId) => ({ tagId })) } : undefined,
-      secondaryCategories: parsed.data.secondaryCategoryIds?.length
-        ? { create: parsed.data.secondaryCategoryIds.map((categoryId) => ({ categoryId })) }
-        : undefined,
-    },
-  });
-  return NextResponse.json(post);
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {

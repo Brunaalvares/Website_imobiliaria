@@ -1,4 +1,4 @@
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 
 const ALLOWED_TAGS = [
   "p",
@@ -36,30 +36,28 @@ const ALLOWED_TAGS = [
   "sub",
 ];
 
-const ALLOWED_ATTR = [
-  "href",
-  "target",
-  "rel",
-  "src",
-  "alt",
-  "title",
-  "class",
-  "style",
-  "width",
-  "height",
-  "colspan",
-  "rowspan",
-  "data-checked",
-  "data-type",
-];
+const ALLOWED_ATTR: Record<string, string[]> = {
+  a: ["href", "name", "target", "rel", "title", "class"],
+  img: ["src", "alt", "title", "width", "height", "class"],
+  "*": [
+    "class",
+    "style",
+    "colspan",
+    "rowspan",
+    "data-checked",
+    "data-type",
+  ],
+};
 
 export function sanitizeBlogHtml(html: string) {
-  return DOMPurify.sanitize(html || "", {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    ALLOW_DATA_ATTR: true,
-    FORBID_TAGS: ["script", "iframe", "object", "embed", "form", "input", "button"],
-    FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover"],
+  return sanitizeHtml(html || "", {
+    allowedTags: ALLOWED_TAGS,
+    allowedAttributes: ALLOWED_ATTR,
+    allowedSchemes: ["http", "https", "mailto", "tel", "data"],
+    allowProtocolRelative: false,
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }),
+    },
   });
 }
 
