@@ -3,7 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PROPERTY_STATUSES, PROPERTY_TYPES, PURPOSES } from "@/lib/constants";
-import { prepareImageForUpload } from "@/lib/image-client";
+import { prepareImageForUpload, PROPERTY_IMAGE_PRESET } from "@/lib/image-client";
 import { Button } from "@/components/ui/Button";
 import { Upload, X, Star } from "lucide-react";
 
@@ -80,7 +80,7 @@ export function PropertyForm({
     try {
       const uploaded: Photo[] = [];
       for (const original of Array.from(files)) {
-        const file = await prepareImageForUpload(original);
+        const file = await prepareImageForUpload(original, PROPERTY_IMAGE_PRESET);
         const fd = new FormData();
         fd.append("file", file);
         fd.append("folder", "properties");
@@ -359,22 +359,31 @@ export function PropertyForm({
           <Upload className="text-navy" />
           <span className="mt-2 text-sm text-gray-muted">
             {uploading
-              ? "Otimizando e enviando imagens..."
-              : "Selecione imagens (JPEG, PNG ou WebP). Elas são comprimidas automaticamente."}
+              ? "Padronizando e enviando imagens..."
+              : "Selecione imagens (JPEG, PNG ou WebP). Elas são recortadas em 4:3 e otimizadas em alta resolução."}
           </span>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
             multiple
             className="hidden"
-            onChange={(e) => uploadFiles(e.target.files)}
+            onChange={(e) => {
+              void uploadFiles(e.target.files);
+              e.target.value = "";
+            }}
           />
         </label>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {photos.map((photo, index) => (
-            <div key={photo.url} className="relative overflow-hidden rounded-xl border border-gray-light">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt={photo.alt || ""} className="h-36 w-full object-cover" />
+            <div key={photo.url} className="overflow-hidden rounded-xl border border-gray-light bg-white">
+              <div className="relative aspect-[4/3] bg-ice">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo.url}
+                  alt={photo.alt || ""}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </div>
               <div className="flex items-center justify-between gap-2 p-2">
                 <button
                   type="button"
