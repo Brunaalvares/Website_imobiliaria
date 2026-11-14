@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 type Photo = { id: string; url: string; alt: string | null; isCover?: boolean; order?: number };
@@ -10,10 +9,10 @@ const PLACEHOLDER =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80";
 
 /**
- * Padrão visual da página de referência (ex.: /imoveis/apartamento-na-peninsula-em-sao-luis):
- * - foto principal contida na coluna (nunca “explode” a página)
+ * Padrão visual da página de referência:
+ * - foto principal contida na coluna
  * - quadro ~4:3 com altura máxima
- * - thumbnails em scroll horizontal sem alargar o layout
+ * - thumbnails em scroll horizontal + setinha quando há mais fotos
  */
 export function PropertyGallery({ photos, title }: { photos: Photo[]; title: string }) {
   const list = useMemo(() => {
@@ -29,7 +28,31 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
 
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const thumbsRef = useRef<HTMLDivElement>(null);
   const current = list[active] || list[0];
+
+  function updateScrollHint() {
+    const el = thumbsRef.current;
+    if (!el) {
+      setCanScrollRight(false);
+      return;
+    }
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 8);
+  }
+
+  useEffect(() => {
+    updateScrollHint();
+    const el = thumbsRef.current;
+    if (!el) return;
+    const onScroll = () => updateScrollHint();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updateScrollHint);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", updateScrollHint);
+    };
+  }, [list.length]);
 
   function prev() {
     setActive((i) => (i - 1 + list.length) % list.length);
@@ -38,14 +61,18 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
     setActive((i) => (i + 1) % list.length);
   }
 
+  function scrollMoreThumbs() {
+    const el = thumbsRef.current;
+    if (!el) return;
+    el.scrollBy({ left: el.clientWidth * 0.7, behavior: "smooth" });
+  }
+
   return (
-    // min-w-0: impede thumbnails de expandirem a coluna do grid
     <div className="w-full min-w-0 max-w-full">
       <div
         className="relative w-full max-w-full overflow-hidden rounded-2xl bg-ice"
         style={{ aspectRatio: "4 / 3", maxHeight: "min(52vh, 480px)" }}
       >
-        {/* img nativa: evita bugs de next/image fill com dezenas de fotos */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={current.url}
@@ -64,28 +91,41 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
       </div>
 
       {list.length > 1 ? (
-        <div className="mt-3 w-full min-w-0 max-w-full overflow-x-auto pb-1">
-          <div className="flex w-max gap-2">
-            {list.map((photo, i) => (
-              <button
-                key={photo.id}
-                type="button"
-                onClick={() => setActive(i)}
-                className={`relative h-[4.5rem] w-[6rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice p-0 ${
-                  i === active ? "border-navy" : "border-transparent"
-                }`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photo.url}
-                  alt={photo.alt || title}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </button>
-            ))}
+        <div className="relative mt-3 w-full min-w-0 max-w-full">
+          <div ref={thumbsRef} className="overflow-x-auto pb-1 [scrollbar-width:thin]">
+            <div className="flex w-max gap-2">
+              {list.map((photo, i) => (
+                <button
+                  key={photo.id}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  className={`relative h-[4.5rem] w-[6rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice p-0 ${
+                    i === active ? "border-navy" : "border-transparent"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.url}
+                    alt={photo.alt || title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
+
+          {canScrollRight ? (
+            <button
+              type="button"
+              onClick={scrollMoreThumbs}
+              aria-label="Ver mais fotos"
+              className="absolute right-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-light bg-white/95 text-navy shadow-sm transition hover:bg-white"
+            >
+              <ChevronRight size={16} strokeWidth={2.25} />
+            </button>
+          ) : null}
         </div>
       ) : null}
 
