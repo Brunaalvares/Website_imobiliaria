@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Bath, BedDouble, Car, Heart, Maximize2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
@@ -62,13 +61,11 @@ export function PropertyCard({
   return (
     <article className="group overflow-hidden rounded-2xl border border-gray-light bg-white shadow-[var(--shadow)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(16,42,67,0.12)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-ice">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={cover}
           alt={property.photos[0]?.alt || property.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width:768px) 100vw, 33vw"
-          quality={85}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           <Badge>{purposeLabel(property.purpose)}</Badge>

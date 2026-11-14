@@ -99,7 +99,8 @@ export default async function PropertyDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="container-site">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr]">
-          <div className="space-y-8">
+          {/* min-w-0: galerias com muitas fotos não estouram a coluna */}
+          <div className="min-w-0 space-y-8">
             <PropertyGallery photos={property.photos} title={property.title} />
 
             <div>

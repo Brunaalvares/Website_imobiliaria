@@ -9,6 +9,12 @@ type Photo = { id: string; url: string; alt: string | null; isCover?: boolean; o
 const PLACEHOLDER =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80";
 
+/**
+ * Padrão visual da página de referência (ex.: /imoveis/apartamento-na-peninsula-em-sao-luis):
+ * - foto principal contida na coluna (nunca “explode” a página)
+ * - quadro ~4:3 com altura máxima
+ * - thumbnails em scroll horizontal sem alargar o layout
+ */
 export function PropertyGallery({ photos, title }: { photos: Photo[]; title: string }) {
   const list = useMemo(() => {
     if (!photos.length) {
@@ -33,19 +39,22 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
   }
 
   return (
-    <div className="w-full">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ice">
-        <Image
+    // min-w-0: impede thumbnails de expandirem a coluna do grid
+    <div className="w-full min-w-0 max-w-full">
+      <div
+        className="relative w-full max-w-full overflow-hidden rounded-2xl bg-ice"
+        style={{ aspectRatio: "4 / 3", maxHeight: "min(52vh, 480px)" }}
+      >
+        {/* img nativa: evita bugs de next/image fill com dezenas de fotos */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           key={current.url}
           src={current.url}
           alt={current.alt || title}
-          fill
-          className="z-0 object-cover"
-          sizes="(max-width:1024px) 100vw, 65vw"
-          quality={90}
-          priority
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="eager"
+          decoding="async"
         />
-        {/* bg-transparent: botão padrão do browser cobria a foto com fundo branco */}
         <button
           type="button"
           onClick={() => setLightbox(true)}
@@ -55,28 +64,28 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
       </div>
 
       {list.length > 1 ? (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-          {list.map((photo, i) => (
-            <button
-              key={photo.id}
-              type="button"
-              onClick={() => setActive(i)}
-              className={`relative aspect-[4/3] w-[6.75rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice p-0 ${
-                i === active ? "border-navy" : "border-transparent"
-              }`}
-            >
-              <span className="pointer-events-none absolute inset-0">
-                <Image
+        <div className="mt-3 w-full min-w-0 max-w-full overflow-x-auto pb-1">
+          <div className="flex w-max gap-2">
+            {list.map((photo, i) => (
+              <button
+                key={photo.id}
+                type="button"
+                onClick={() => setActive(i)}
+                className={`relative h-[4.5rem] w-[6rem] shrink-0 overflow-hidden rounded-xl border-2 bg-ice p-0 ${
+                  i === active ? "border-navy" : "border-transparent"
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={photo.url}
                   alt={photo.alt || title}
-                  fill
-                  className="object-cover"
-                  sizes="108px"
-                  quality={70}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
-              </span>
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
       ) : null}
 
@@ -93,14 +102,12 @@ export function PropertyGallery({ photos, title }: { photos: Photo[]; title: str
           <button type="button" className="absolute left-4 text-white" onClick={prev} aria-label="Anterior">
             <ChevronLeft size={36} />
           </button>
-          <div className="relative h-[80vh] w-full max-w-5xl">
-            <Image
+          <div className="relative flex h-[80vh] w-full max-w-5xl items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={current.url}
               alt={current.alt || title}
-              fill
-              className="object-contain"
-              sizes="100vw"
-              quality={90}
+              className="max-h-full max-w-full object-contain"
             />
           </div>
           <button type="button" className="absolute right-4 text-white" onClick={next} aria-label="Próximo">
