@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -42,21 +43,20 @@ export function Header({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 overflow-hidden border-b border-transparent bg-white transition-all",
+        "sticky top-0 z-50 border-b border-transparent bg-white transition-all",
         scrolled && "border-gray-light shadow-[0_4px_20px_rgba(16,42,67,0.06)]",
       )}
     >
       <div className="container-site flex h-[var(--header-h)] items-center justify-between gap-4">
-        <Link
-          href="/"
-          className="flex h-[calc(var(--header-h)-20px)] max-h-12 shrink-0 items-center overflow-hidden"
-          aria-label={brandName}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <Link href="/" className="relative flex shrink-0 items-center" aria-label={brandName}>
+          <Image
             src={logo}
             alt={`${brandName} Imóveis`}
-            className="h-full w-auto max-w-[200px] object-contain object-left md:max-w-[240px]"
+            width={200}
+            height={40}
+            className="!h-9 !w-auto max-h-9 object-contain object-left md:!h-10 md:max-h-10"
+            style={{ width: "auto", height: 36 }}
+            priority
           />
         </Link>
 
