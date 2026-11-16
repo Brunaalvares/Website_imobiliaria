@@ -1,9 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
-import { Analytics } from "@/components/analytics/Analytics";
 import { getSiteSettings } from "@/lib/settings";
-
 
 export const dynamic = "force-dynamic";
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -11,7 +9,6 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <>
-      <Analytics />
       <Header brandName={settings.brandName} whatsapp={settings.whatsapp} logoUrl={settings.logoUrl} />
       <main className="min-h-[70vh]">{children}</main>
       <Footer

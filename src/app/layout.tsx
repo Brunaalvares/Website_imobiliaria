@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
+import { GoogleTag } from "@/components/analytics/GoogleTag";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -26,6 +27,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <GoogleTag />
+      </head>
       <body className={`${manrope.variable} antialiased`}>{children}</body>
     </html>
   );
