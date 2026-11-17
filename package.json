@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:setup": "prisma db push && tsx prisma/seed.ts",
+    "db:secure": "node scripts/enable-rls.mjs",
     "postinstall": "prisma generate"
   },
   "prisma": {

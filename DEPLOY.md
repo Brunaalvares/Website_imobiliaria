@@ -33,6 +33,20 @@ Sem `SUPABASE_SERVICE_ROLE_KEY`, o admin não consegue subir imagens.
 
 Diagnóstico rápido após o deploy: abra `/api/health` e confira `hasStorage: true`.
 
+## Segurança do banco (RLS)
+
+O site acessa o Postgres só via **Prisma** (não via PostgREST/`anon` key).
+Para eliminar os alertas críticos do Supabase (`rls_disabled_in_public`,
+`sensitive_columns_exposed`), rode após `db:push` / criação de tabelas:
+
+```bash
+npm run db:secure
+```
+
+Isso habilita Row Level Security em todas as tabelas públicas e revoga
+grants de `anon` / `authenticated` (a API pública do Supabase deixa de
+ler/editar/apagar dados). O Prisma continua funcionando normalmente.
+
 ## Rede Supabase
 
 **Database → Network Restrictions**: permitir `0.0.0.0/0` (ou IPs da Vercel).
